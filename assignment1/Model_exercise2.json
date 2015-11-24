@@ -1,0 +1,58 @@
+// Collection of Users
+User = {
+	"_id": Integer,
+	"username" : String,
+	"name": String,
+	"surname" : {
+		"surn_1" : String,
+		"surn_2" : String
+	},
+	"email" : String,
+	"created_at": Date,
+	"password": String,
+	"payment" : [
+		{
+			"name" : String,
+			"card_name" : String,
+			"expiration_date": Date,
+			"secret_num" : Integer
+		}
+	],
+	"bill_info" : [
+		{
+			"name" : String,
+			"NIF" : String,
+			"location": {
+				"name" : String,
+				"number": Integer,
+				"floor" : Integer
+			}
+		}
+	],
+	""
+	"series" : [
+		{
+			"serie_id" : Integer,
+			"reproductions" : [
+				Date
+			]
+		}
+	]
+}
+
+
+// Collection of Series.
+
+Serie = {
+	"_id" : Integer,
+	"name" : String,
+	"director" [] String,
+	"started_at" : Date,
+	"episodes" : [
+		{
+			"name" : String,
+			"length" : Integer,
+			"year" : Integer
+		}
+	]
+}
