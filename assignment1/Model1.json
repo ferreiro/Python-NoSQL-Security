@@ -1,0 +1,47 @@
+// Colección de usuarios
+
+User = {
+	"_id":1,
+	"username" : "ferreiro",
+	"username" : "ferreiro",
+	"name": "Jorge",
+	"surname" : {
+		"surn_1" : "Ferreiro",
+		"surn_2" : "G"
+	},
+	"birthday":"16/03/1995",
+	"password":"123",
+	"email" : "jgferreiro@gmail.com",
+	"type"  : "client", // client, admin, provedor, other...
+	"extra_info": {
+		// 
+	}
+}
+
+// Documento cliente
+Client = { 
+	"sports" : [],
+	"city":"Madrid",
+	"nacionality" : "Spain",
+	"phone_num" : [],
+	"phone_num_mobile" : []
+}
+// Documento administrador
+Admin = { 
+	"office" : {
+		"edificio":"",
+		"piso" : "",
+		"number" : ""
+	},
+	"phone_num": "343",
+	"hiringDate" : "15/01/199",
+	"NIF" : "3030303",
+	"department" : "software",
+	"accesses" : [
+		{
+			"date" : "",
+			"time" : "",
+			"articles" : []
+		}
+	]
+}
