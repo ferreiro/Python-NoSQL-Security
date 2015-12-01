@@ -1,7 +1,9 @@
+
 // Collection of Users
+
 User = {
-	"_id": Integer,
-	"username" : String,
+	"user_id": Integer,
+	"alias" : String,
 	"name": String,
 	"surname" : {
 		"surn_1" : String,
@@ -13,46 +15,78 @@ User = {
 	"payment" : [
 		{
 			"name" : String,
-			"card_name" : String,
+			"card_number" : String,
 			"expiration_date": Date,
-			"secret_num" : Integer
+			"secret_number" : Integer
 		}
 	],
 	"bill_info" : [
 		{
 			"name" : String,
 			"NIF" : String,
-			"location": {
-				"name" : String,
-				"number": Integer,
-				"floor" : Integer
-			}
+			"street" : String,
+			"number": Integer,
+			"floor" : Integer
 		}
 	],
-	""
-	"series" : [
+	"punctuation" : [
 		{
 			"serie_id" : Integer,
-			"reproductions" : [
-				Date
-			]
+			"episode_id" : Integer,
+			"grade" : Integer
 		}
+	],
+	"episodesWatched" : [
+		{
+			"episode_id": Integer, // Esto es un dato no super importante, pero esto nos permite que si el usuario quiere también buscar la información de la temporada (para ese capitulo) pueda tener este campo a mano. Es más por nada, ya que un capitulo pertenece a una serie.
+			"history" : [
+				Date1,
+				Date2
+			]
+		}	
 	]
 }
-
 
 // Collection of Series.
 
 Serie = {
 	"_id" : Integer,
 	"name" : String,
-	"director" [] String,
-	"started_at" : Date,
+	"started_year" : Date,
+	"directors" : [
+		"name1",  // Array of String
+		"name2",
+		"name3"
+	],
 	"episodes" : [
+		// Array de id's de episodios.
+		// Nos permite asegurar que el documento de series no crece mucho a medida que 
+		// insertamos nuevos episodios. Además de eso,
+		// por las consultas que tenemos en nuestra base de datos, creemos que es la mejor forma.
+		// desacoplar los episodios en otra colección de documentos.
+		"episode_id",
+		"episode_id",
+		"episode_id"		
+	]
+}
+
+// Collection of Episodes.
+// Argumentación: 4. Obtener todas las valoraciones de un capítulo concreto de cara a calcular su puntuación media
+
+Episode = {
+	"name" : String, // Unique
+	"duration" : Integer,
+	"year" : Integer,
+	"puntuation" : [
 		{
-			"name" : String,
-			"length" : Integer,
-			"year" : Integer
+			"user_id" : Integer,
+			"value" : "Aweomse"
+		}
+	],
+	"comments" : [
+		{
+			"user_id" : Integer,
+			"text" : "Aweomse"
 		}
 	]
 }
