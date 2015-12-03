@@ -10,7 +10,8 @@ otros ni haberlo obtenido de una fuente externa.
 
 dbName = 'giw';
 
-from bottle import post, request, route, run, template
+from bottle import post, get, request, route, run, template
+import pymongo
 from pymongo import MongoClient # install MongoClient
 
 client = MongoClient()
@@ -24,49 +25,44 @@ users = db['users']
 # Todas las inserciones se deben realizar en la colección 'users' dentro de la
 # base de datos 'giw'.
 
-@route('/')
-def createNewUser():
-	return template('add_user');
+@get('/')
+def registerUser():
+	return template('register_user');
 
 @post('/add_user')
 def add_user_post():
-
-	user_id = str(request.forms.get('_id'));
-
-	cursor = db.users.find({
-		'_id': str(user_id),
-		{
-			upsert: true
-		}
-	});
-
-	if (cursor.count() == 0):
-		# Insert new user on database.
+	
+	try:
+		userID = str(request.forms.get('_id'));
 		db.users.insert({
-			'_id' : user_id,
+			'_id' : str(request.forms.get('_id')),
 			'country': str(request.forms.get('country')),
 			'zip': str(request.forms.get('zip')),
 			'email': str(request.forms.get('email')),
 			'gender': str(request.forms.get('gender')),
 			'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
 			'password': str(request.forms.get('password')), 
-			'year': str(request.forms.get('year')),
-		})
-	else:
-		# Si el usuario ya existe en la colección el servidor web mostrará un mensaje indicándolo. 
-		return "Your user exists on our database";
-	
-	# En otro caso mostrará un mensaje indicando que la inserción ha tenido éxito.
-	return "The user was created :-)"
-	
+			'year': str(request.forms.get('year'))
+		});
+		return template('result', message="[ Good ] The user was created :-)")
 
+	except pymongo.errors.DuplicateKeyError, e:
+		if (pymongo.errors.DuplicateKeyError):
+			print "This user already exists!"
+
+	# User exists already on the database. 
+	return template('result', message="[ BAD ] Your user exists on our database")
+
+@route('/change_email')
+def change_email_view():
+	return template('change_email');
 
 @post('/change_email')
 def change_email():
 	user_id = request.forms.get('_id');
 	email = request.forms.get('email');
 
-    
+
 
 @post('/insert_or_update')
 def insert_or_update():
