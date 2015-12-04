@@ -124,11 +124,17 @@ def add_user_post():
 	print  "\n" + str(message['success']) + "\n" # display on console success
 	return template('result', message=message['success'])
 
+'''
+	Change email of a user that already exists in the collection.
+	Como resultado de esta petición el servidor web debe mostrar el número de documentos modificados.
+'''
 @post('/change_email')
 def change_email():
 
-	_id 	= request.forms.get('_id')
+	_id 	= str(request.forms.get('_id'))
 	email 	= str(request.forms.get('email'))
+
+	updatedUser = None;
 
 	try:
 		updatedUser = users.find_one_and_update(
@@ -136,13 +142,17 @@ def change_email():
 			{'$set' : {'email':email}},
 			return_document=ReturnDocument.AFTER
 		);
-		return template('profile', user=updatedUser);
+
 	except ValueError:
 		print "Email coudln't change"
-		print ValueError
+		return template('result', message="[ BAD ] Your user exists on our database")
 
-	# User exists already on the database. 
-	return template('result', message="[ BAD ] Your user exists on our database")
+	if (updatedUser == None):
+		print "0 documents modified"
+	else:
+		print "1 documents modified"
+	
+	return template('profile', user=updatedUser);
 
 @post('/insert_or_update')
 def insert_or_update():
