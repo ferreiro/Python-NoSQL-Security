@@ -6,15 +6,8 @@
 
 <p>
 	<a href="/{{user['_id']}}/edit">
-		
+		Change email
 	</a>
-
-	<form action="/delete" method="post">
-	    <a href="javascript:;" onclick="parentNode.submit();">
-	    	Edit profile<%=n%>
-	    </a>
-	    <input type="hidden" name="_id" value="{{user['_id']}}"/>
-	</form>
 
 	<form action="/delete" method="post">
 	    <a href="javascript:;" onclick="parentNode.submit();">Delete user<%=n%></a>

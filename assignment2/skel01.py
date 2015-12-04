@@ -63,22 +63,26 @@ def registerUser(userID):
 	cursor = db.users.find({
 		'_id' : userID
 	});
-	user = cursor[0]
-	return template('profile', user=user);
 
-@route('/edit')
-def editUser_info_view():
-	userID = str(request.forms.get('_id'));
+	if (cursor.count() > 0): 
+		user = cursor[0]
+		return template('profile', user=user);
+	
+	return template('result', message="User doesn't exist...");
+
+@get('/<userID>/edit')
+def editUser_info_view(userID):
+	
 	cursor = db.users.find({
 		'_id' : userID
 	});
 
 	if (cursor.count() == 0):
-		return "No user with that name"
+		print "No user with that ID"
+		return "No user with that ID"
 	else:
 		user = cursor[0] # python dictionary from a user
 		return template('change_email', user=user);
-
 
 #####################################
 ########### POST METHODS ############
@@ -86,8 +90,11 @@ def editUser_info_view():
 
 ''' 
 	Insert a new user into our database
-	Only if user doesn't exist on our system
+	Only if user doesn't exist on our system.
+	When success, print a message and show
+	a success view.
 '''
+
 @post('/add_user')
 def add_user_post():
 	
@@ -117,11 +124,17 @@ def add_user_post():
 	print  "\n" + str(message['success']) + "\n" # display on console success
 	return template('result', message=message['success'])
 
+'''
+	Change email of a user that already exists in the collection.
+	Como resultado de esta petición el servidor web debe mostrar el número de documentos modificados.
+'''
 @post('/change_email')
 def change_email():
 
-	_id 	= request.forms.get('_id')
+	_id 	= str(request.forms.get('_id'))
 	email 	= str(request.forms.get('email'))
+
+	updatedUser = None;
 
 	try:
 		updatedUser = users.find_one_and_update(
@@ -129,13 +142,17 @@ def change_email():
 			{'$set' : {'email':email}},
 			return_document=ReturnDocument.AFTER
 		);
-		return template('profile', user=updatedUser);
+
 	except ValueError:
 		print "Email coudln't change"
-		print ValueError
+		return template('result', message="[ BAD ] Your user exists on our database")
 
-	# User exists already on the database. 
-	return template('result', message="[ BAD ] Your user exists on our database")
+	if (updatedUser == None):
+		print "0 documents modified"
+	else:
+		print "1 documents modified"
+	
+	return template('profile', user=updatedUser);
 
 @post('/insert_or_update')
 def insert_or_update():

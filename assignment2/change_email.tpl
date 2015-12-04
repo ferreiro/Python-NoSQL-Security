@@ -7,19 +7,24 @@
 <form action="/change_email" method="POST">
 
 	% for key in user:
-		% if key == "email":
-			<div class="input">
-				<legend id="{{ key }}">{{ key }}</legend>
+		<div class="input">
+
+			<legend id="{{ key }}">
+				{{ key }}
+			</legend>
+
+			% if key == "email":
 				<input name="{{ key }}" type="text" value="{{user[key]}}" />
-			</div>
-		% elif key == "_id":
-			<p> 
-				{{key}}: {{user[key]}} 
-				<b>(Id can not be changed)</b>
-			</p>
-		% else:
-			<p> {{key}}: {{user[key]}}</p>
-		% end
+			% elif key == "_id":
+				<p>
+					{{user[key]}}<b>(Id can not be changed)</b>
+				</p>
+				<input name="{{ key }}" type="hidden" value="{{user[key]}}" /><!-- Hidden, because we don't want users to modify their ids... But we need to change the email -->
+			% else:
+				<p> {{user[key]}}</p>
+			% end
+
+		</div>
 	% end
 	
 	<input type="submit" value="Send me!">
