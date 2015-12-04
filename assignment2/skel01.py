@@ -84,6 +84,11 @@ def editUser_info_view(userID):
 		user = cursor[0] # python dictionary from a user
 		return template('change_email', user=user);
 
+# Display user profile.
+@get('/delete_year')
+def delete_by_year_view():
+	return template('delete_year');
+
 #####################################
 ########### POST METHODS ############
 #####################################
@@ -173,7 +178,17 @@ def delete_id():
 
 @post('/delete_year')
 def delete_year():
-    pass
+
+	year= request.forms.get('year');
+	search = users.find({'year':year});
+	numberdocument= search.count();
+
+	for s in search:
+		_id = s['_id'] 
+		users.find_one_and_delete({'_id': _id});
+	
+	print "Deleted " + str(numberdocument) + " documents"
+	#return template('result',message="deleted "+ numberdocument +"documents")
 
 @route('/*')
 def error():

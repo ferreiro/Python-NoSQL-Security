@@ -1,5 +1,9 @@
 <link rel="stylesheet" href="/static/style.css">
 
+<a href="/delete_year">
+	Delete by year
+</a>
+
 <form action="/add_user" method="POST">
 	<input name="_id" type="text" placeholder="Your name" />
 	<input name="country" type="text" placeholder="Country" />
