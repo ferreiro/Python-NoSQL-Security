@@ -179,16 +179,24 @@ def delete_id():
 @post('/delete_year')
 def delete_year():
 
-	year= request.forms.get('year');
-	search = users.find({'year':year});
-	numberdocument= search.count();
+	numDeleted = 0
+	year = request.forms.get('year')
+	cursor = users.find({'year':year})
 
-	for s in search:
+	print year
+	print cursor.count()
+
+	for s in cursor:
 		_id = s['_id'] 
-		users.find_one_and_delete({'_id': _id});
+		deleted = users.find_one_and_delete({'_id': _id});
+		if deleted != None:
+			numDeleted += 1
+
+	msg = "deleted " + str(numDeleted) + " documents"
+	print msg
 	
-	print "Deleted " + str(numberdocument) + " documents"
-	#return template('result',message="deleted "+ numberdocument +"documents")
+	return template('result',message=msg)
+
 
 @route('/*')
 def error():
