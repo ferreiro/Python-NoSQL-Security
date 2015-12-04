@@ -128,12 +128,12 @@ def add_user_post():
 		users.insert({
 			'_id' : str(request.forms.get('_id')),
 			'country': str(request.forms.get('country')),
-			'zip': str(request.forms.get('zip')),
+			'zip': int(request.forms.get('zip')),
 			'email': str(request.forms.get('email')),
 			'gender': str(request.forms.get('gender')),
 			'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
 			'password': str(request.forms.get('password')), 
-			'year': str(request.forms.get('year'))
+			'year': int(request.forms.get('year'))
 		});
 
 	except pymongo.errors.DuplicateKeyError, e:
@@ -166,11 +166,12 @@ def change_email():
 	except ValueError:
 		print "Email coudln't change"
 	
-	if (updatedUser != None):
-		print "\n1 documents modified\n"
+	if updatedUser != None:
+		# The user exists. Show his profile
+		print "\n 1 documents modified\n"
 		return template('profile', user=updatedUser);
-
-	print "\n0 documents modified\n"
+	
+	print "\n 0 documents modified\n"
 	return template('result', message="[ BAD ] Your user NOT exist on our database")
 
 @post('/insert_or_update')
@@ -189,12 +190,12 @@ def insert_or_update():
     		{
     			'$set' : {
 	    			'country': str(request.forms.get('country')),
-		    		'zip': str(request.forms.get('zip')),
+		    		'zip': int(request.forms.get('zip')),
 		    		'email': str(request.forms.get('email')),
 		    		'gender': str(request.forms.get('gender')),
 		    		'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
 		    		'password': str(request.forms.get('password')), 
-		    		'year': str(request.forms.get('year'))
+		    		'year': int(request.forms.get('year'))
     			}
     		},
     		upsert=True,
@@ -215,23 +216,21 @@ def insert_or_update():
 def delete_id():
 
 	_id = str(request.forms.get('_id'));
-
 	deleted = users.find_one_and_delete({'_id': _id});
 	
 	if deleted != None:
+		print "\n1 document deleted from the system"
 		return template('result', message="User deleted successfully!");
 	
+	print "\n0 document deleted from the system"
 	return template('result', message="User doesn't exist!");
 
 @post('/delete_year')
 def delete_year():
 
 	numDeleted = 0
-	year = request.forms.get('year')
+	year = int(request.forms.get('year'))
 	cursor = users.find({'year':year})
-
-	print year
-	print cursor.count()
 
 	for s in cursor:
 		_id = s['_id'] 
@@ -243,7 +242,6 @@ def delete_year():
 	print msg
 
 	return template('result',message=msg)
-
 
 @route('/*')
 def error():
