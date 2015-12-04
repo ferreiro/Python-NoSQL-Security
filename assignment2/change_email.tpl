@@ -1,31 +1,20 @@
 <link rel="stylesheet" href="/static/style.css">
 
 <h1>
-	Edit @{{user['_id']}} email
+	Change the name for a username
 </h1>
 
 <form action="/change_email" method="POST">
 
-	% for key in user:
-		<div class="input">
+	<div class="input">
+		<p>Username</p>
+		<input name="_id" type="text" value="" placeholder="Username" />
+	</div>
 
-			<legend id="{{ key }}">
-				{{ key }}
-			</legend>
+	<div class="input">
+		<p>New email</p>
+		<input name="email" type="text" value="" placeholder="New email" />
+	</div>
 
-			% if key == "email":
-				<input name="{{ key }}" type="text" value="{{user[key]}}" />
-			% elif key == "_id":
-				<p>
-					{{user[key]}}<b>(Id can not be changed)</b>
-				</p>
-				<input name="{{ key }}" type="hidden" value="{{user[key]}}" /><!-- Hidden, because we don't want users to modify their ids... But we need to change the email -->
-			% else:
-				<p> {{user[key]}}</p>
-			% end
-
-		</div>
-	% end
-	
 	<input type="submit" value="Send me!">
 </form>

@@ -48,18 +48,38 @@ def fonts(filename):
 # Todas las inserciones se deben realizar en la colección 'users' dentro de la
 # base de datos 'giw'.
 
-@get('/')
-def registerUser():
-	return template('register_user');
-
-
 ####################################
 ########### GET METHODS ############
 ####################################
 
+@get('/')
+def index():
+	return template('index');
+
+@get('/change_email')
+def change_email_view():
+	return template('change_email');
+
+@get('/insert')
+def insert__view():
+	return template('insert');
+
+@get('/insert_or_update')
+def insert_or_update_view():
+	return template('insert_or_update');
+
+@get('/delete')
+def delete_view():
+	return template('delete');
+
+# Display user profile.
+@get('/delete_year')
+def delete_by_year_view():
+	return template('delete_year');
+
 # Display user profile.
 @get('/<userID>')
-def registerUser(userID):
+def display_user_byID_view(userID):
 	cursor = db.users.find({
 		'_id' : userID
 	});
@@ -69,9 +89,9 @@ def registerUser(userID):
 		return template('profile', user=user);
 	
 	return template('result', message="User doesn't exist...");
-
+	
 @get('/<userID>/edit')
-def editUser_info_view(userID):
+def edit_user_byID_view(userID):
 	
 	cursor = db.users.find({
 		'_id' : userID
@@ -82,12 +102,7 @@ def editUser_info_view(userID):
 		return "No user with that ID"
 	else:
 		user = cursor[0] # python dictionary from a user
-		return template('change_email', user=user);
-
-# Display user profile.
-@get('/delete_year')
-def delete_by_year_view():
-	return template('delete_year');
+		return template('change_email_profile', user=user);
 
 #####################################
 ########### POST METHODS ############
@@ -150,19 +165,51 @@ def change_email():
 
 	except ValueError:
 		print "Email coudln't change"
-		return template('result', message="[ BAD ] Your user exists on our database")
-
-	if (updatedUser == None):
-		print "\n0 documents modified\n"
-	else:
-		print "\n1 documents modified\n"
 	
-	return template('profile', user=updatedUser);
+	if (updatedUser != None):
+		print "\n1 documents modified\n"
+		return template('profile', user=updatedUser);
+
+	print "\n0 documents modified\n"
+	return template('result', message="[ BAD ] Your user NOT exist on our database")
 
 @post('/insert_or_update')
 def insert_or_update():
-    pass
+    
+    message = "Error inserting user"
 
+    try:
+    	userID = str(request.forms.get('_id'));
+
+    	#find_one_and_update(filter, update, projection=None, sort=None, return_document=ReturnDocument.BEFORE, **kwargs)
+    	doc = users.find_one_and_update(
+    		{
+    			'_id' :userID
+    		},
+    		{
+    			'$set' : {
+	    			'country': str(request.forms.get('country')),
+		    		'zip': str(request.forms.get('zip')),
+		    		'email': str(request.forms.get('email')),
+		    		'gender': str(request.forms.get('gender')),
+		    		'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
+		    		'password': str(request.forms.get('password')), 
+		    		'year': str(request.forms.get('year'))
+    			}
+    		},
+    		upsert=True,
+    		return_document=ReturnDocument.BEFORE);
+
+    	if doc == None:
+    		message="\nThe user wasn't on our system. Inserting!\n"
+    	else:
+    		message="\nThe user was on the system. Modifying it!\n"
+    		
+    except ValueError:
+    	message = ValueError;
+
+    print message
+    return template('result', message=message)
 
 @post('/delete')
 def delete_id():
@@ -194,7 +241,7 @@ def delete_year():
 
 	msg = "deleted " + str(numDeleted) + " documents"
 	print msg
-	
+
 	return template('result',message=msg)
 
 
