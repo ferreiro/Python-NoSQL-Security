@@ -148,9 +148,9 @@ def change_email():
 		return template('result', message="[ BAD ] Your user exists on our database")
 
 	if (updatedUser == None):
-		print "0 documents modified"
+		print "\n0 documents modified\n"
 	else:
-		print "1 documents modified"
+		print "\n1 documents modified\n"
 	
 	return template('profile', user=updatedUser);
 
