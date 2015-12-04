@@ -14,13 +14,11 @@ from bottle import post, get, request, route, run, template, static_file
 import pymongo
 import json
 from pymongo import MongoClient # install MongoClient
+from pymongo import ReturnDocument
 
 client = MongoClient()
 db = client['giw']
 users = db['users']
-
-
-
 
 #####################################
 ########## ASSETS ROUTING ###########
@@ -46,10 +44,6 @@ def images(filename):
 def fonts(filename):
     return static_file(filename, root='static/')
 
-
-#print result[0]
-#print result[0]['email']
-
 # ¡MUY IMPORTANTE!
 # Todas las inserciones se deben realizar en la colección 'users' dentro de la
 # base de datos 'giw'.
@@ -63,7 +57,7 @@ def add_user_post():
 	
 	try:
 		userID = str(request.forms.get('_id'));
-		db.users.insert({
+		users.insert({
 			'_id' : str(request.forms.get('_id')),
 			'country': str(request.forms.get('country')),
 			'zip': str(request.forms.get('zip')),
@@ -82,6 +76,15 @@ def add_user_post():
 	# User exists already on the database. 
 	return template('result', message="[ BAD ] Your user exists on our database")
 
+# Display user profile.
+@get('/<userID>')
+def registerUser(userID):
+	cursor = db.users.find({
+		'_id' : userID
+	});
+	user = cursor[0]
+	return template('profile', user=user);
+
 @route('/<userID>/edit')
 def editUser_info_view(userID):
 	cursor = db.users.find({
@@ -98,17 +101,21 @@ def editUser_info_view(userID):
 def change_email():
 
 	_id 	= request.forms.get('_id')
-	email 	= request.forms.get('email')
-
-	db.users.find();
-	#db.users.update_one({'_id': _id}, {'$inc': {'email': email}})
+	email 	= str(request.forms.get('email'))
 
 	try:
-		#db.users.update_one({ '_id': _id}, {'email':email});
-		print "Remplazado!"
+		updatedUser = users.find_one_and_update(
+			{'_id':_id},
+			{'$set' : {'email':email}},
+			return_document=ReturnDocument.AFTER
+		);
+		return template('profile', user=updatedUser);
 	except ValueError:
+		print "Email coudln't change"
 		print ValueError
-		print "Que tal"
+
+	# User exists already on the database. 
+	return template('result', message="[ BAD ] Your user exists on our database")
 
 @post('/insert_or_update')
 def insert_or_update():

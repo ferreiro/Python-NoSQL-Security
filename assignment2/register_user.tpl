@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/static/style.css">
 
 <form action="/add_user" method="POST">
 	<input name="_id" type="text" placeholder="Your name" />
