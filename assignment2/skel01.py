@@ -85,8 +85,9 @@ def registerUser(userID):
 	user = cursor[0]
 	return template('profile', user=user);
 
-@route('/<userID>/edit')
-def editUser_info_view(userID):
+@route('/edit')
+def editUser_info_view():
+	userID = str(request.forms.get('_id'));
 	cursor = db.users.find({
 		'_id' : userID
 	});
