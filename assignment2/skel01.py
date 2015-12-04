@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Autores: XXX
-Grupo YYY
+Autores: Jorge García Ferreiro, Tomasso Innoccenti and Luis
+Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no haber
 colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
@@ -12,13 +12,13 @@ dbName = 'giw';
 
 from bottle import post, get, request, route, run, template, static_file
 import pymongo
-import json
 from pymongo import MongoClient # install MongoClient
 from pymongo import ReturnDocument
+import json
 
-client = MongoClient()
-db = client['giw']
-users = db['users']
+client 	= MongoClient()
+db 		= client['giw']
+users 	= db['users']
 
 #####################################
 ########## ASSETS ROUTING ###########
@@ -52,9 +52,18 @@ def fonts(filename):
 def registerUser():
 	return template('register_user');
 
+''' 
+	Insert a new user into our database
+	Only if user doesn't exist on our system
+'''
 @post('/add_user')
 def add_user_post():
 	
+	message = {
+		"success" : "[ Good ] The user was created :-)",
+		"error" : "[ Error ] Your user exists on our database"
+	}
+
 	try:
 		userID = str(request.forms.get('_id'));
 		users.insert({
@@ -67,14 +76,14 @@ def add_user_post():
 			'password': str(request.forms.get('password')), 
 			'year': str(request.forms.get('year'))
 		});
-		return template('result', message="[ Good ] The user was created :-)")
 
 	except pymongo.errors.DuplicateKeyError, e:
 		if (pymongo.errors.DuplicateKeyError):
-			print "This user already exists!"
+			print message['error'] # display on console success
+		return template('result', message=message['error'])
 
-	# User exists already on the database. 
-	return template('result', message="[ BAD ] Your user exists on our database")
+	print  message['success'] # display on console success
+	return template('result', message=message['success'])
 
 # Display user profile.
 @get('/<userID>')
