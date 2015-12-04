@@ -63,22 +63,26 @@ def registerUser(userID):
 	cursor = db.users.find({
 		'_id' : userID
 	});
-	user = cursor[0]
-	return template('profile', user=user);
 
-@route('/edit')
-def editUser_info_view():
-	userID = str(request.forms.get('_id'));
+	if (cursor.count() > 0): 
+		user = cursor[0]
+		return template('profile', user=user);
+	
+	return template('result', message="User doesn't exist...");
+
+@get('/<userID>/edit')
+def editUser_info_view(userID):
+	
 	cursor = db.users.find({
 		'_id' : userID
 	});
 
 	if (cursor.count() == 0):
-		return "No user with that name"
+		print "No user with that ID"
+		return "No user with that ID"
 	else:
 		user = cursor[0] # python dictionary from a user
 		return template('change_email', user=user);
-
 
 #####################################
 ########### POST METHODS ############
@@ -86,8 +90,11 @@ def editUser_info_view():
 
 ''' 
 	Insert a new user into our database
-	Only if user doesn't exist on our system
+	Only if user doesn't exist on our system.
+	When success, print a message and show
+	a success view.
 '''
+
 @post('/add_user')
 def add_user_post():
 	
