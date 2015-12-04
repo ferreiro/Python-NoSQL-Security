@@ -156,11 +156,19 @@ def delete_id():
 
 @post('/delete_year')
 def delete_year():
-    pass
+
+	year=str(request.forms.get('year'));
+	search = users.find({'year':year});
+	numberdocument= search.count();
+
+	for c in search:
+		users.find_one_and_delete({'_id':c[0]});
+	
+	return template('result',message="deleted "+ numberdocument +"documents")
 
 @route('/*')
 def error():
 	return "Not found"
 
-run(host='127.0.0.1', port=3000);
+run(host='127.0.0.1', port=6000);
 
