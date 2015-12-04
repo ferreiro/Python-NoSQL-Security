@@ -8,8 +8,24 @@
 	<a href="/{{user['_id']}}/edit">
 		Edit profile
 	</a>
+
+	<form action="/delete" method="post">
+	    <a href="javascript:;" onclick="parentNode.submit();">Delete user<%=n%></a>
+	    <input type="hidden" name="_id" value="{{user['_id']}}"/>
+	</form>
 </p>
 
-%for i in user:
-	<p> {{i}}: {{user[i]}}</p>
+%for key in user:
+	% if key == 'likes':
+		<p>
+			<b>Tags:</b>
+			%for l in user[key]:
+				<span class="tag">
+					{{l}}
+				</span>
+			%end
+		</p>
+	% else:
+		<p> {{key}}: {{user[key]}}</p>
+	% end 
 % end

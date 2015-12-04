@@ -124,12 +124,23 @@ def insert_or_update():
 
 @post('/delete')
 def delete_id():
-    pass
-    
-    
+
+	_id = str(request.forms.get('_id'));
+
+	deleted = users.find_one_and_delete({'_id': _id});
+	
+	if deleted != None:
+		return template('result', message="User deleted successfully!");
+	
+	return template('result', message="User doesn't exist!");
+
 @post('/delete_year')
 def delete_year():
     pass
+
+@route('/*')
+def error():
+	return "Not found"
 
 run(host='127.0.0.1', port=3000);
 
