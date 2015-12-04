@@ -52,6 +52,38 @@ def fonts(filename):
 def registerUser():
 	return template('register_user');
 
+
+####################################
+########### GET METHODS ############
+####################################
+
+# Display user profile.
+@get('/<userID>')
+def registerUser(userID):
+	cursor = db.users.find({
+		'_id' : userID
+	});
+	user = cursor[0]
+	return template('profile', user=user);
+
+@route('/edit')
+def editUser_info_view():
+	userID = str(request.forms.get('_id'));
+	cursor = db.users.find({
+		'_id' : userID
+	});
+
+	if (cursor.count() == 0):
+		return "No user with that name"
+	else:
+		user = cursor[0] # python dictionary from a user
+		return template('change_email', user=user);
+
+
+#####################################
+########### POST METHODS ############
+#####################################
+
 ''' 
 	Insert a new user into our database
 	Only if user doesn't exist on our system
@@ -79,33 +111,11 @@ def add_user_post():
 
 	except pymongo.errors.DuplicateKeyError, e:
 		if (pymongo.errors.DuplicateKeyError):
-			print message['error'] # display on console success
+			print  "\n" + str(message['error']) + "\n" # display on console success
 		return template('result', message=message['error'])
 
-	print  message['success'] # display on console success
+	print  "\n" + str(message['success']) + "\n" # display on console success
 	return template('result', message=message['success'])
-
-# Display user profile.
-@get('/<userID>')
-def registerUser(userID):
-	cursor = db.users.find({
-		'_id' : userID
-	});
-	user = cursor[0]
-	return template('profile', user=user);
-
-@route('/edit')
-def editUser_info_view():
-	userID = str(request.forms.get('_id'));
-	cursor = db.users.find({
-		'_id' : userID
-	});
-
-	if (cursor.count() == 0):
-		return "No user with that name"
-	else:
-		user = cursor[0] # python dictionary from a user
-		return template('change_email', user=user);
 
 @post('/change_email')
 def change_email():
