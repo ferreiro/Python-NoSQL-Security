@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Autores: Jorge García Ferreiro, Tomasso Innoccenti and Luis
+Autores: Jorge García Ferreiro, Tommaso Innocenti and Luis
 Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no haber
@@ -123,19 +123,36 @@ def add_user_post():
 		"error" : "[ Error ] Your user exists on our database"
 	}
 
-	try:
-		userID = str(request.forms.get('_id'));
-		users.insert({
-			'_id' : str(request.forms.get('_id')),
-			'country': str(request.forms.get('country')),
-			'zip': int(request.forms.get('zip')),
-			'email': str(request.forms.get('email')),
-			'gender': str(request.forms.get('gender')),
-			'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
-			'password': str(request.forms.get('password')), 
-			'year': int(request.forms.get('year'))
-		});
+	zip  		= request.forms.get('zip'); # must be integer
+	year 		= request.forms.get('year'); # must be integer
+	_id  		= str(request.forms.get('_id'));
+	country 	= str(request.forms.get('country'));
+	email 		= str(request.forms.get('email'));
+	gender 		= str(request.forms.get('gender'));
+	likes	 	= str(request.forms.get('likes')).split(','); # Create array of strings.
+	password 	= str(request.forms.get('password'));
 
+	if not zip.isdigit():
+		zip=000 # evitamos que salte excepción si no meten digito en el zip
+	else:
+		zip=int(zip) # cast to int
+	
+	if not year.isdigit():
+		year=int(2015) # evitamos que salte excepción si no meten digito en el zip
+	else:
+		year=int(year) # cast to int
+
+	try:
+		users.insert({
+			'_id' : _id,
+			'country': country,
+			'zip': zip,
+			'email': email,
+			'gender': gender,
+			'likes': likes, 
+			'password': password, 
+			'year': year
+		});
 	except pymongo.errors.DuplicateKeyError, e:
 		if (pymongo.errors.DuplicateKeyError):
 			print  "\n" + str(message['error']) + "\n" # display on console success
