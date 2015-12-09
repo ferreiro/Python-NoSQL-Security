@@ -27,7 +27,7 @@ msg = {
 		'success' : 'User added to our database',
 		'error' : {
 			'duplicate'	:	'The username is already on our system',
-			'invalid' 	: 	'Zip or Year are not valid due they are not only digits'
+			'invalid' 	: 	'Sorry. Zip or Year are not valid. They must be numbers.'
 		}
 	}
 }
@@ -93,19 +93,21 @@ def delete_by_year_view():
 # Display user profile.
 @get('/<userID>')
 def display_user_byID_view(userID):
-	cursor = db.users.find({
-		'_id' : userID
-	});
+	try:
+		cursor = db.users.find({
+			'_id' : userID
+		});
 
-	if (cursor.count() > 0): 
-		user = cursor[0]
-		return template('profile', user=user);
-	
-	return template('result', message="User doesn't exist...");
-	
+		if (cursor.count() > 0): 
+			user = cursor[0]
+			return template('profile', user=user);
+		
+		return template('result', message="User doesn't exist...");
+	except:
+		return template('result', message="Problems retrieving that user");
+
 @get('/<userID>/edit')
 def edit_user_byID_view(userID):
-	
 	cursor = db.users.find({
 		'_id' : userID
 	});
@@ -143,52 +145,36 @@ def isDigit(integerValue):
 
 @post('/add_user')
 def add_user_post():
-	
-	message = {
-		"success" : "[ Good ] The user was created :-)",
-		"error" : "[ Error ] Your user exists on our database"
-	}
 
-	zip  		= request.forms.get('zip'); # must be integer
-	year 		= request.forms.get('year'); # must be integer
-	_id  		= str(request.forms.get('_id'));
-	country 	= str(request.forms.get('country'));
-	email 		= str(request.forms.get('email'));
-	gender 		= str(request.forms.get('gender'));
-	likes	 	= str(request.forms.get('likes')).split(','); # Create array of strings.
-	password 	= str(request.forms.get('password'));
+	zip		= request.forms.get('zip')
+	year 	= request.forms.get('year')
 
-	if not zip.isdigit():
-		zip=000 # evitamos que salte excepción si no meten digito en el zip
-	else:
-		zip=int(zip) # cast to int
-	
-	if not year.isdigit():
-		year=int(2015) # evitamos que salte excepción si no meten digito en el zip
-	else:
-		year=int(year) # cast to int
+	if not (isDigit(zip) and isDigit(year)):
+		invalidTypeErr = msg['insertion']['error']['invalid']
+		print 'Error: ' + invalidTypeErr
+		return template('result', message=invalidTypeErr)
 
 	try:
-		users.insert({
-			'_id' : _id,
-			'country': country,
-			'zip': zip,
-			'email': email,
-			'gender': gender,
-			'likes': likes, 
-			'password': password, 
-			'year': year
+		# Try to add the user to our database
+		cursor = users.insert_one({
+			'_id' 		: str(request.forms.get('_id')),
+			'country'	: str(request.forms.get('country')),
+			'zip'		: int(zip),
+			'email'		: str(request.forms.get('email')),
+			'gender'	: str(request.forms.get('gender')),
+			'likes'		: str(request.forms.get('likes')).split(','), 
+			'password'	: str(request.forms.get('password')),
+			'year'		: int(year)
 		});
 	except pymongo.errors.DuplicateKeyError, e:
-		if (pymongo.errors.DuplicateKeyError):
-			print  "\n" + str(message['error']) + "\n" # display on console success
-		return template('result', message=message['error'])
-
-	print  "\n" + str(message['success']) + "\n" # display on console success
-	return template('result', message=message['success'])
+		print 'Error: ' + msg['insertion']['error']['duplicate'] + '\n'
+		return template('result', message=msg['insertion']['error']['duplicate'])
+	
+	print 'Success: ' + msg['insertion']['success'] + '\n'
+	return template('result', message=msg['insertion']['success'])
 
 '''
-	Change email of a user that already exists in the collection.
+	Update email of a user that already exists in the collection.
 	Como resultado de esta petición el servidor web debe mostrar el número de documentos modificados.
 '''
 @post('/change_email')
@@ -197,12 +183,18 @@ def change_email():
 	_id 	= str(request.forms.get('_id'))
 	email 	= str(request.forms.get('email'))
 
-	updatedUser = None;
+	updatedUser = None; # User object | None= user doesn't exist
 
 	try:
 		updatedUser = users.find_one_and_update(
-			{'_id':_id},
-			{'$set' : {'email':email}},
+			{	
+				'_id':_id 
+			},
+			{
+				'$set' : {
+					'email':email
+				}
+			},
 			return_document=ReturnDocument.AFTER
 		);
 
@@ -217,15 +209,26 @@ def change_email():
 	print "\n 0 documents modified\n"
 	return template('result', message="[ BAD ] Your user NOT exist on our database")
 
+
+'''
+	Try to insert a new user.
+	If the user is already on our database,
+	data will be updated.
+'''
 @post('/insert_or_update')
 def insert_or_update():
     
-    message = "Error inserting user"
+    zip		= request.forms.get('zip')
+    year 	= request.forms.get('year')
+
+    if not (isDigit(zip) and isDigit(year)):
+    	invalidTypeErr = msg['insertion']['error']['invalid']
+    	print 'Error: ' + invalidTypeErr
+    	return template('result', message=invalidTypeErr)
 
     try:
     	userID = str(request.forms.get('_id'));
 
-    	#find_one_and_update(filter, update, projection=None, sort=None, return_document=ReturnDocument.BEFORE, **kwargs)
     	doc = users.find_one_and_update(
     		{
     			'_id' :userID
@@ -233,12 +236,12 @@ def insert_or_update():
     		{
     			'$set' : {
 	    			'country': str(request.forms.get('country')),
-		    		'zip': int(request.forms.get('zip')),
+		    		'zip': int(zip),
 		    		'email': str(request.forms.get('email')),
 		    		'gender': str(request.forms.get('gender')),
 		    		'likes': str(request.forms.get('likes')).split(','), # Create array of strings.
 		    		'password': str(request.forms.get('password')), 
-		    		'year': int(request.forms.get('year'))
+		    		'year': int(year)
     			}
     		},
     		upsert=True,
