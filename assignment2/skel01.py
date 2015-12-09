@@ -20,6 +20,19 @@ client 	= MongoClient()
 db 		= client['giw']
 users 	= db['users']
 
+# Error or success messages as global variable
+
+msg = {
+	'insertion' : {
+		'success' : 'User added to our database',
+		'error' : {
+			'duplicate'	:	'The username is already on our system',
+			'invalid' 	: 	'Zip or Year are not valid due they are not only digits'
+		}
+	}
+}
+
+
 #####################################
 ########## ASSETS ROUTING ###########
 #####################################
@@ -103,6 +116,19 @@ def edit_user_byID_view(userID):
 	else:
 		user = cursor[0] # python dictionary from a user
 		return template('change_email_profile', user=user);
+
+'''
+	Aux:
+	Return true if a given input don't contains
+	only a digit. False if is a digit.
+	We cast inputted value to use the isdigit()
+	method on strings 
+'''
+def noDigit(integerValue):
+	return not str(integerValue).isdigit() # cast to string
+
+def isDigit(integerValue):
+	return str(integerValue).isdigit() # cast to string
 
 #####################################
 ########### POST METHODS ############
