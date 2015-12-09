@@ -1,7 +1,7 @@
-% include('header.tpl', title='Change email')
+% include('header.tpl')
 
 <h1>
-	Change the name for a username
+	Change email for a username
 </h1>
 
 <form action="/change_email" method="POST">
@@ -19,4 +19,4 @@
 	<input type="submit" value="Send me!">
 </form>
 
-% include ('footer.tpl')
+% include('footer.tpl')

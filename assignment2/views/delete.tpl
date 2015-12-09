@@ -6,10 +6,14 @@
 
 <form action="/delete" method="POST">
 
-	<div class="input">
-		<p>Username</p>
+	<fieldset class="input">
+		<label for="_id">
+			Username
+		</label>
 		<input name="_id" type="text" value="" placeholder="Username" />
-	</div>
+	</fieldset>
 
 	<input type="submit" value="Send me!">
 </form>
+
+% include('footer.tpl')

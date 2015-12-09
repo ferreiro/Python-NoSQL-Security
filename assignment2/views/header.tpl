@@ -16,11 +16,17 @@
 </head>
 <body>
 
-<ul>
-	<li><a href="/insert">Insert single user</a><br /><br />
-	<li><a href="/insert_or_update">insert or update</a><br /><br />
-	<li><a href="/change_email">Change email</a><br /><br />
-	<li><a href="/delete">Delete</a><br /><br />
-	<li><a href="/delete_year">Delete year</a><br /><br />
-</ul>
-
+<div class="header_wraper">
+	<div class="header">
+		<a href="/" class="header_logo">
+			International coders
+		</a>
+		<ul class="header_menu">
+			<li><a href="/insert">Insert single user</a><br /><br />
+			<li><a href="/insert_or_update">insert or update</a><br /><br />
+			<li><a href="/change_email">Change email</a><br /><br />
+			<li><a href="/delete">Delete</a><br /><br />
+			<li><a href="/delete_year">Delete year</a><br /><br />
+		</ul>
+	</div>
+</div>

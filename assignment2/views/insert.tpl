@@ -1,18 +1,72 @@
 % include('header.tpl')
 
-<a href="/delete_year">
-	Delete by year
-</a>
+<h1>
+	Insert new username
+</h1>
 
 <form action="/add_user" method="POST">
-	<input name="_id" type="text" placeholder="Your name" />
-	<input name="country" type="text" placeholder="Country" />
-	<input name="zip" type="text" placeholder="Zip" />
-	<input name="email" type="text" placeholder="Email" />
-	<input name="gender" type="text" placeholder="Gender" />
-	<input name="likes" type="text" placeholder="Likes" />
-	<input name="password" type="text" placeholder="Password" />
-	<input name="year" type="text" placeholder="Year" />
 
-	<input type="submit" value="Send me!">
+	<fieldset class="input">
+		<label for="_id">
+			Name
+		</label>
+		<input name="_id" type="text" placeholder="Your username" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="country">
+			Country
+		</label>
+		<input name="country" type="text" placeholder="Country" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="zip">
+			Country
+		</label>
+		<input name="zip" type="text" placeholder="Zip" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="email">
+			Email
+		</label>
+		<input name="email" type="text" placeholder="Email" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="gender">
+			Gender
+		</label>
+		<input name="gender" type="text" placeholder="Gender" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="likes">
+			Likes
+		</label>
+		<input name="likes" type="text" placeholder="Likes" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="password">
+			Password
+		</label>
+		<input name="password" type="text" placeholder="Password" />
+	</fieldset>
+
+	<fieldset class="input">
+		<label for="year">
+			Year
+		</label>
+		<input name="year" type="text" placeholder="Year" />
+	</fieldset>
+
+	<fieldset class="button">
+		<input type="submit" value="Send me!">
+	</fieldset>
+
+	
 </form>
+
+% include('footer.tpl')

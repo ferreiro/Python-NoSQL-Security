@@ -1,8 +1,8 @@
 % include('header.tpl')
 
-<a href="/delete_year">
-	Delete by year
-</a>
+<h1>
+	Insert if not exist<br /> or update in other case
+</h1>
 
 <form action="/insert_or_update" method="POST">
 	<input name="_id" type="text" placeholder="Your name" />
@@ -16,3 +16,5 @@
 
 	<input type="submit" value="Send me!">
 </form>
+
+% include('footer.tpl')
