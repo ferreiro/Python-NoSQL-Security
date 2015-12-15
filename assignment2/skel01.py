@@ -158,8 +158,10 @@ def add_user_post():
 		# Try to add the user to our database
 		cursor = users.insert_one({
 			'_id' 		: str(request.forms.get('_id')),
-			'country'	: str(request.forms.get('country')),
-			'zip'		: int(zip),
+			'address'	: {
+				'country'	: str(request.forms.get('country')),
+				'zip'		: int(zip)
+			},
 			'email'		: str(request.forms.get('email')),
 			'gender'	: str(request.forms.get('gender')),
 			'likes'		: str(request.forms.get('likes')).split(','), 
@@ -235,8 +237,10 @@ def insert_or_update():
     		},
     		{
     			'$set' : {
-	    			'country': str(request.forms.get('country')),
-		    		'zip': int(zip),
+	    			'address' : {
+		    			'country': str(request.forms.get('country')),
+			    		'zip': int(zip)
+	    			},
 		    		'email': str(request.forms.get('email')),
 		    		'gender': str(request.forms.get('gender')),
 		    		'likes': str(request.forms.get('likes')).split(','), # Create array of strings.

@@ -25,6 +25,15 @@
 				</span>
 			%end
 		</p>
+	% elif key == 'address':
+		<p>
+			<b>Address:</b>
+			%for l in user[key]:
+				<span class="tag">
+					{{user[key][l]}}
+				</span>
+			%end
+		</p>
 	% else:
 		<p> {{key}}: {{user[key]}}</p>
 	% end 
