@@ -7,6 +7,7 @@ Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no hab
 colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
 otros ni haberlo obtenido de una fuente externa.
 """
+
 """
 	IMPLICIT SCHEME
 
@@ -36,17 +37,35 @@ def find_user_id():
     pass
 
 
+# http://localhost:8080/find_users?gender=Male
+# http://localhost:8080/find_users?gender=Male&year=2009
+
 @get('/find_users')
 def find_users():
-    # http://localhost:8080/find_users?gender=Male
-    # http://localhost:8080/find_users?gender=Male&year=2009
-    params = dict((k,request.query.getall(k)) for k in request.query.keys())
-    #print params
-    #print params['gender']
+    
+    params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
+    validParams = {'_id', 'email', 'gender', 'year'}
+
+    print validParams
+    #if not checkParameters(params, len(params), validParams):
+    #	return "Error........"
+    #else:
+    #	return "Valid"
+
+    # Bad? Return...
+
+    # Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
+    # Get user with that shit of parameters.
+
+    print params['gender']
+
+# http://localhost:8080/find_users_or?gender=Male&year=2000
 
 @get('/find_users_or')
 def find_users_or():
-    # http://localhost:8080/find_users_or?gender=Male&year=2000
+    
+    # http://stackoverflow.com/questions/12064764/pymongo-query-on-list-field-and-or
+    # https://docs.mongodb.org/manual/reference/operator/query/
     pass
 
        
@@ -78,6 +97,26 @@ def find_country_limit_sorted():
 ################# Funciones auxiliares a partir de este punto #################
 ###############################################################################
 
+def checkParameters(params, maxParams, validParams):
+	if len(params) > maxParams:
+		return (False,'More than valid parameters')
+
+	print params
+	for p in params:
+		print p
+		if p in validParams:
+			continue
+		else:
+			return (False,'Key with multiple values');
+
+	return True
+	#if type(params) is Dict and type(validParams) is List
+	#else:
+	#	return False;
+	# Check length (more than 4 are wrong) ---> show error
+	# Check parameters name
+	# 		How do we check parameters name?
+			# if key in Dictionar - _id, email, gender y year
 
 
 
