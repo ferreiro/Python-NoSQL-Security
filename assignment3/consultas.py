@@ -180,18 +180,15 @@ def find_like():
 
 	if isValid:
 		like = params['like']
-		cursor = db.users.find({ likes: { '$in' : ["football"] }} );
+		cursor = db.users.find({ 'likes': { '$in' : like }} );
 		if (cursor.count() == 0):
-			msg = "No user with that like"
-			return template('error', msg=msg)
-			#return template('error', msg=message)
+			return template('error', msg="No user with that like")
 		else:
 			userList = []
 			for c in cursor:
 				userList.append(c)
 	
-			return str(userList)
-			#return template('table', content=userList)
+			return template('table', userList=userList)
 	else:
 		return template('error', msg=msg)
 
@@ -234,7 +231,7 @@ def email_year():
 	(isValid, msg) = checkParameters(params, maxParams, validParams)
 
 	if isValid:
-		year = params['year'][0]
+		year = int(params['year'][0])
 		cursor = db.users.find({'year' : year});
 		if (cursor.count() == 0):
 			msg = "No user for this year"
@@ -245,8 +242,7 @@ def email_year():
 			for c in cursor:
 				userList.append(c)
 	
-			return str(userList)
-			#return template('table', content=userList)
+			return template('table', userList=userList)
 	else:
 		return template('error', msg=msg)
 
@@ -281,7 +277,9 @@ def checkParameters(params, maxParams, validParams):
 		return (False, 'Valid Parameters are not List Type');
 
 	# Now checks if the passed number of parameters are accepted.
-	if len(params) > maxParams:
+	if len(params) == 0:
+		return (False,'Empty Parameters. We only find when some parameters are provided')
+	elif len(params) > maxParams:
 		return (False,'We don\'t accept more than ' + str(maxParams) + ' params passed by url')
 
 	for key in params:
