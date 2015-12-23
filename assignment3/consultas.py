@@ -208,14 +208,12 @@ def find_country():
 		if (cursor.count() == 0):
 			msg = "No user with that country"
 			return template('error', msg=msg)
-			#return template('error', msg=message)
 		else:
 			userList = []
 			for c in cursor:
 				userList.append(c)
 	
-			return str(userList)
-			#return template('table', content=userList)
+			return template('table', userList=userList)
 	else:
 		return template('error', msg=msg)
 
@@ -260,12 +258,14 @@ def find_country_limit_sorted():
 	if isValid:
 		
 		country = params['country'][0]
-		cursor = db.users.find({ 'address.country': country } );
+		limit = int(params['limit'][0])
+		ord = params['ord'][0] # ord | desc
+		
+		cursor = db.users.find({ 'address.country': country }).limit(limit);
 		
 		if (cursor.count() == 0):
 			msg = "No user for this year"
 			return template('error', msg=msg)
-			#return template('error', msg=message)
 		else:
 			userList = []
 			for c in cursor:
