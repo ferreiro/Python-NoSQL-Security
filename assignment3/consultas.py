@@ -78,27 +78,18 @@ def find_users():
 	(isValid, msg) = checkParameters(params, maxParams, validParams)
 	
 	if isValid:
-		_id =""
-		email =""
-		gender =""
-		year =-1
 
-		for p in params:
-			if p == '_id':
-				_id = params['_id'][0]
-			elif p == 'email':
-				email = params['email'][0]
-			elif p == 'gender':
-				gender = params['gender'][0]
-			elif p == 'year':
-				year = params['year'][0]
+		query = {}
 
-		cursor = db.users.find({"$or":[ 
-			{"_id":_id},
-			{"email":email},
-			{"gender":gender},
-			{"year":int(year)}
-		]})
+		for key in params:
+			value = params[key][0]
+			if key == 'year':
+				value = int(value) # cast the years
+			query[key] = value;
+			
+		#print query
+
+		cursor = db.users.find({"$and":[ query ]})
 
 		if (cursor.count() == 0):
 			return template('error', msg="Nothing found with your criteria")
@@ -111,7 +102,7 @@ def find_users():
 	else:
 		return template('error', msg=msg)
 
-	# Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
+	# Antes de la tabla aparecera un mensaje indicando el numero de resultados encontrados.
 	# Get user with that shit of parameters.
 
 # http://localhost:8080/find_users_or?gender=Male&year=2000
@@ -121,7 +112,38 @@ def find_users_or():
 	
 	# http://stackoverflow.com/questions/12064764/pymongo-query-on-list-field-and-or
 	# https://docs.mongodb.org/manual/reference/operator/query/
-	pass
+	
+	maxParams 	= 4
+	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['_id', 'email', 'gender', 'year']
+
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	
+	if isValid:
+
+		query = {}
+
+		for key in params:
+			value = params[key][0]
+			if key == 'year':
+				value = int(value) # cast the years
+			query[key] = value;
+			
+		#print query
+
+		cursor = db.users.find({"$or":[ query ]})
+
+		if (cursor.count() == 0):
+			return template('error', msg="Nothing found with your criteria")
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+		
+			return template('table', userList=userList)
+	else:
+		return template('error', msg=msg)
+
 
 	   
 @get('/find_like')
