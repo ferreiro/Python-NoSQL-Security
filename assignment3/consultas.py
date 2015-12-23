@@ -210,7 +210,7 @@ def email_year():
 	(isValid, msg) = checkParameters(params, maxParams, validParams)
 
 	if isValid:
-		year = params['year'][0]
+		year = int(params['year'][0])
 		cursor = db.users.find({'year' : year});
 		if (cursor.count() == 0):
 			msg = "No user for this year"
@@ -221,8 +221,7 @@ def email_year():
 			for c in cursor:
 				userList.append(c)
 	
-			return str(userList)
-			#return template('table', content=userList)
+			return template('table', userList=userList)
 	else:
 		return template('error', msg=msg)
 
