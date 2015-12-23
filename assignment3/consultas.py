@@ -196,7 +196,28 @@ def find_like():
 @get('/find_country')
 def find_country():
 	# http://localhost:8080/find_country?country=Spain
-	pass
+	maxParams   = 1 
+	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['country']
+
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+
+	if isValid:
+		country = params['country'][0]
+		cursor = db.users.find({'address.country' : country});
+		if (cursor.count() == 0):
+			msg = "No user with that country"
+			return template('error', msg=msg)
+			#return template('error', msg=message)
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+	
+			return str(userList)
+			#return template('table', content=userList)
+	else:
+		return template('error', msg=msg)
 
 
 @get('/find_email_year')
