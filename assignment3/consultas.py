@@ -105,14 +105,33 @@ def find_country_limit_sorted():
 ################# Funciones auxiliares a partir de este punto #################
 ###############################################################################
 
+''' 
+	Returns a tuple where first index is a boolean value (Valid or False) 
+	and the second parameter is an string with the error or success message
+	
+	Accepted parameters:
+	1. Params: Dictionary where key is the name of param and value is an array of elements for this parameter
+	2. MaxParams: Integer of maximun different keys (parameters name) it accepts.
+	3. ValidParams: Dictionary of valid parameters accepted: validParams = { 'name', 'surname' }
+'''		
 def checkParameters(params, maxParams, validParams):
+	
+	# Error type checking | source: http://stackoverflow.com/questions/2225038/determine-the-type-of-an-object
+	if type(params) is not dict:
+		return (False, 'Parameters are not dictionary type');
+	elif type(maxParams) is not int:
+		return (False, 'Maxium Parameters is not Integer Type');
+	elif type(validParams) is not list:
+		return (False, 'Valid Parameters are not List Type');
+
+	# Now checks if the passed number of parameters are accepted.
 	if len(params) > maxParams:
 		return (False,'We don\'t accept more than ' + str(maxParams) + ' params passed by url')
 
 	for key in params:
 		
 		totalParams = len(params[key]) # params associated with that key
-		print totalParams
+		#print totalParams
 
 		if totalParams > 1:
 			errMsg = str(key) + " has " + str(totalParams) + " different values passing by params"; 
@@ -122,19 +141,8 @@ def checkParameters(params, maxParams, validParams):
 			return (False, errMsg);
 		else:
 			continue # The key params is valid
-	
-	print "||| Finish ---"
 
 	return (True, 'Params are correct')
-	#if type(params) is Dict and type(validParams) is List
-	#else:
-	#	return False;
-	# Check length (more than 4 are wrong) ---> show error
-	# Check parameters name
-	# 		How do we check parameters name?
-			# if key in Dictionar - _id, email, gender y year
-
-
 
 ###############################################################################
 ###############################################################################
