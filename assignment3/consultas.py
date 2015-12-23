@@ -229,7 +229,30 @@ def email_year():
 @get('/find_country_limit_sorted')
 def find_country_limit_sorted():
 	# http://localhost:8080/find_country_limit_sorted?country=Spain&limit=20&ord=asc
-	pass
+	
+	maxParams   = 3
+	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['country', 'limit', 'ord']
+
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+
+	if isValid:
+		
+		country = params['country'][0]
+		cursor = db.users.find({ 'address.country': country } );
+		
+		if (cursor.count() == 0):
+			msg = "No user for this year"
+			return template('error', msg=msg)
+			#return template('error', msg=message)
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+	
+			return template('table', userList=userList)
+	else:
+		return template('error', msg=msg)
 
 
 ###############################################################################
