@@ -43,10 +43,20 @@ def find_user_id():
 @get('/find_users')
 def find_users():
     
+    maxParams 	= 1 
     params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
     validParams = {'_id', 'email', 'gender', 'year'}
 
-    print validParams
+    isValid = checkParameters(params, maxParams, validParams)
+    
+    print isValid[0] # False or True
+    print isValid[1] # Message
+
+    #print len(params)
+    #print params
+    #print maxParams
+    #print validParams
+
     #if not checkParameters(params, len(params), validParams):
     #	return "Error........"
     #else:
@@ -56,8 +66,6 @@ def find_users():
 
     # Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
     # Get user with that shit of parameters.
-
-    print params['gender']
 
 # http://localhost:8080/find_users_or?gender=Male&year=2000
 
@@ -99,17 +107,25 @@ def find_country_limit_sorted():
 
 def checkParameters(params, maxParams, validParams):
 	if len(params) > maxParams:
-		return (False,'More than valid parameters')
+		return (False,'We don\'t accept more than ' + str(maxParams) + ' params passed by url')
 
-	print params
-	for p in params:
-		print p
-		if p in validParams:
-			continue
+	for key in params:
+		
+		totalParams = len(params[key]) # params associated with that key
+		print totalParams
+
+		if totalParams > 1:
+			errMsg = str(key) + " has " + str(totalParams) + " different values passing by params"; 
+			return (False, errMsg)
+		elif not key in validParams:
+			errMsg = str(key) + " param is not valid" 
+			return (False, errMsg);
 		else:
-			return (False,'Key with multiple values');
+			continue # The key params is valid
+	
+	print "||| Finish ---"
 
-	return True
+	return (True, 'Params are correct')
 	#if type(params) is Dict and type(validParams) is List
 	#else:
 	#	return False;
