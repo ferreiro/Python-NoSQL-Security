@@ -27,15 +27,36 @@ otros ni haberlo obtenido de una fuente externa.
 
 """
 
-from bottle import get, run, request
+from bottle import get, run, request, template
 # Resto de importaciones
+
 
 
 @get('/find_user_id')
 def find_user_id():
     # http://localhost:8080/find_user_id?_id=user_1
-    pass
+   
+   maxParams   = 1 
+   params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+   validParams = ['_id']
 
+   isValid = checkParameters(params, maxParams, validParams)
+
+   if (isValid[0]==True):
+       userID=params['_id']
+       cursor = db.users.find({'_id' : userID});
+       if (cursor.count() == 0):
+           message = "No user with that ID"
+           print message
+           return message
+           #return template('error', msg=message)
+       else:
+           userlist = cursor # python dictionary from a user
+           return "Correct"
+           #return template('table', content=userlist)
+   else
+       print isValid[1]
+       
 
 # http://localhost:8080/find_users?gender=Male
 # http://localhost:8080/find_users?gender=Male&year=2009
@@ -45,24 +66,14 @@ def find_users():
     
     maxParams 	= 1 
     params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
-    validParams = {'_id', 'email', 'gender', 'year'}
+    validParams = ['_id', 'email', 'gender', 'year']
 
-    isValid = checkParameters(params, maxParams, validParams)
+    (isValid, msg) = checkParameters(params, maxParams, validParams)
     
-    print isValid[0] # False or True
-    print isValid[1] # Message
-
-    #print len(params)
-    #print params
-    #print maxParams
-    #print validParams
-
-    #if not checkParameters(params, len(params), validParams):
-    #	return "Error........"
-    #else:
-    #	return "Valid"
-
-    # Bad? Return...
+    if isValid:
+    	return msg
+    else:
+    	return template(error, msg=msg)
 
     # Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
     # Get user with that shit of parameters.
