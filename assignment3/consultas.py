@@ -71,14 +71,43 @@ def find_user_id():
 @get('/find_users')
 def find_users():
 	
-	maxParams 	= 1 
+	maxParams 	= 4
 	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['_id', 'email', 'gender', 'year']
 
 	(isValid, msg) = checkParameters(params, maxParams, validParams)
 	
 	if isValid:
-		return template('table', userList=[])
+		_id =""
+		email =""
+		gender =""
+		year =-1
+
+		for p in params:
+			if p == '_id':
+				_id = params['_id'][0]
+			elif p == 'email':
+				email = params['email'][0]
+			elif p == 'gender':
+				gender = params['gender'][0]
+			elif p == 'year':
+				year = params['year'][0]
+
+		cursor = db.users.find({"$or":[ 
+			{"_id":_id},
+			{"email":email},
+			{"gender":gender},
+			{"year":int(year)}
+		]})
+
+		if (cursor.count() == 0):
+			return template('error', msg="Nothing found with your criteria")
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+		
+			return template('table', userList=userList)
 	else:
 		return template('error', msg=msg)
 
