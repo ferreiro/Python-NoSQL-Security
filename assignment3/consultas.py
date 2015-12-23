@@ -28,88 +28,96 @@ otros ni haberlo obtenido de una fuente externa.
 """
 
 from bottle import get, run, request, template
+
 # Resto de importaciones
+import pymongo
+from pymongo import MongoClient # install MongoClient
+from pymongo import ReturnDocument
 
-
+client 	= MongoClient()
+db 		= client['giw']
 
 @get('/find_user_id')
 def find_user_id():
-    # http://localhost:8080/find_user_id?_id=user_1
+	# http://localhost:8080/find_user_id?_id=user_1
    
-   maxParams   = 1 
-   params      = dict((k,request.query.getall(k)) for k in request.query.keys())
-   validParams = ['_id']
+	maxParams   = 1 
+	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['_id']
 
-   isValid = checkParameters(params, maxParams, validParams)
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
 
-   if (isValid[0]==True):
-       userID=params['_id']
-       cursor = db.users.find({'_id' : userID});
-       if (cursor.count() == 0):
-           message = "No user with that ID"
-           print message
-           return message
-           #return template('error', msg=message)
-       else:
-           userlist = cursor # python dictionary from a user
-           return "Correct"
-           #return template('table', content=userlist)
-   else
-       print isValid[1]
-       
+	if isValid:
+		userID=params['_id'][0]
+		cursor = db.users.find({'_id' : userID});
+		if (cursor.count() == 0):
+			message = "No user with that ID"
+			print message
+			return message
+			#return template('error', msg=message)
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+	
+			return str(userList)
+			#return template('table', content=userList)
+	else:
+		print msg
+
 
 # http://localhost:8080/find_users?gender=Male
 # http://localhost:8080/find_users?gender=Male&year=2009
 
 @get('/find_users')
 def find_users():
-    
-    maxParams 	= 1 
-    params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
-    validParams = ['_id', 'email', 'gender', 'year']
+	
+	maxParams 	= 1 
+	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['_id', 'email', 'gender', 'year']
 
-    (isValid, msg) = checkParameters(params, maxParams, validParams)
-    
-    if isValid:
-    	return msg
-    else:
-    	return template(error, msg=msg)
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	
+	if isValid:
+		return msg
+	else:
+		return template(error, msg=msg)
 
-    # Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
-    # Get user with that shit of parameters.
+	# Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
+	# Get user with that shit of parameters.
 
 # http://localhost:8080/find_users_or?gender=Male&year=2000
 
 @get('/find_users_or')
 def find_users_or():
-    
-    # http://stackoverflow.com/questions/12064764/pymongo-query-on-list-field-and-or
-    # https://docs.mongodb.org/manual/reference/operator/query/
-    pass
+	
+	# http://stackoverflow.com/questions/12064764/pymongo-query-on-list-field-and-or
+	# https://docs.mongodb.org/manual/reference/operator/query/
+	pass
 
-       
+	   
 @get('/find_like')
 def find_like():
-    # http://localhost:8080/find_like?like=football
-    pass
+	# http://localhost:8080/find_like?like=football
+	pass
 
 
 @get('/find_country')
 def find_country():
-    # http://localhost:8080/find_country?country=Spain
-    pass
+	# http://localhost:8080/find_country?country=Spain
+	pass
 
 
 @get('/find_email_year')
 def email_year():
-    # http://localhost:8080/find_email_year?year=1992
-    pass
+	# http://localhost:8080/find_email_year?year=1992
+	pass
 
 
 @get('/find_country_limit_sorted')
 def find_country_limit_sorted():
-    # http://localhost:8080/find_country_limit_sorted?country=Spain&limit=20&ord=asc
-    pass
+	# http://localhost:8080/find_country_limit_sorted?country=Spain&limit=20&ord=asc
+	pass
 
 
 ###############################################################################
@@ -159,4 +167,4 @@ def checkParameters(params, maxParams, validParams):
 ###############################################################################
 
 if __name__ == "__main__":
-    run(host='localhost',port=8080,debug=True)
+	run(host='localhost',port=8080,debug=True)
