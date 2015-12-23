@@ -98,7 +98,29 @@ def find_users_or():
 @get('/find_like')
 def find_like():
 	# http://localhost:8080/find_like?like=football
-	pass
+	
+	maxParams   = 1 
+	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['like']
+
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+
+	if isValid:
+		like = params['like']
+		cursor = db.users.find({ likes: { '$in' : ["football"] }} );
+		if (cursor.count() == 0):
+			msg = "No user with that like"
+			return template('error', msg=msg)
+			#return template('error', msg=message)
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+	
+			return str(userList)
+			#return template('table', content=userList)
+	else:
+		return template('error', msg=msg)
 
 
 @get('/find_country')
@@ -110,7 +132,29 @@ def find_country():
 @get('/find_email_year')
 def email_year():
 	# http://localhost:8080/find_email_year?year=1992
-	pass
+		
+	maxParams   = 1 
+	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	validParams = ['year']
+
+	(isValid, msg) = checkParameters(params, maxParams, validParams)
+
+	if isValid:
+		year = params['year'][0]
+		cursor = db.users.find({'year' : year});
+		if (cursor.count() == 0):
+			msg = "No user for this year"
+			return template('error', msg=msg)
+			#return template('error', msg=message)
+		else:
+			userList = []
+			for c in cursor:
+				userList.append(c)
+	
+			return str(userList)
+			#return template('table', content=userList)
+	else:
+		return template('error', msg=msg)
 
 
 @get('/find_country_limit_sorted')
