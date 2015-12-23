@@ -51,9 +51,8 @@ def find_user_id():
 		userID=params['_id'][0]
 		cursor = db.users.find({'_id' : userID});
 		if (cursor.count() == 0):
-			message = "No user with that ID"
-			print message
-			return message
+			msg = "No user with that ID"
+			return template('error', msg=msg)
 			#return template('error', msg=message)
 		else:
 			userList = []
@@ -63,7 +62,7 @@ def find_user_id():
 			return str(userList)
 			#return template('table', content=userList)
 	else:
-		print msg
+		return template('error', msg=msg)
 
 
 # http://localhost:8080/find_users?gender=Male
@@ -79,9 +78,9 @@ def find_users():
 	(isValid, msg) = checkParameters(params, maxParams, validParams)
 	
 	if isValid:
-		return msg
+		return template('table', userList=[])
 	else:
-		return template(error, msg=msg)
+		return template('error', msg=msg)
 
 	# Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
 	# Get user with that shit of parameters.
