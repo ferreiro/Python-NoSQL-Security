@@ -83,22 +83,25 @@ def find_users():
 		gender =""
 		year =-1
 
-		for p in params:
-			if p == '_id':
-				_id = params['_id'][0]
-			elif p == 'email':
-				email = params['email'][0]
-			elif p == 'gender':
-				gender = params['gender'][0]
-			elif p == 'year':
-				year = params['year'][0]
+		query = []
 
-		cursor = db.users.find({"$or":[ 
-			{"_id":_id},
-			{"email":email},
-			{"gender":gender},
-			{"year":int(year)}
-		]})
+		for p in params:
+			# Structure [{"_id":_id}]
+
+			elem = {}
+			value = params[p][0]
+
+			if p == 'year':
+				value = int(value)
+
+			elem[p] = value
+
+			query.append(elem);
+
+		print query
+
+
+		cursor = db.users.find({"$and":query})
 
 		if (cursor.count() == 0):
 			return template('error', msg="Nothing found with your criteria")
