@@ -35,7 +35,7 @@ from pymongo import MongoClient # install MongoClient
 from pymongo import ReturnDocument
 
 client 	= MongoClient()
-db 		= client['giw2']
+db 		= client['giw']
 
 
 # http://localhost:8080/find_user_id?_id=user_1
