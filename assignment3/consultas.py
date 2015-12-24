@@ -87,12 +87,6 @@ def composeQuery(params):
 
 	return query
 
-
-
-
-# http://localhost:8080/find_users?gender=Male
-# http://localhost:8080/find_users?gender=Male&year=2009
-
 ''' 
 This method can be used for find_users_or or find_users
 the only that changes is that when you pass filter_and as true
@@ -100,7 +94,7 @@ the program will make an and of all the paramters
 and when or, it make an or on the query
 '''
 
-def filterUsers_and_or(filter_and):
+def filterUsers_and_or(make_and):
 
 	URL_Params 	= dict((k,request.query.getall(k)) for k in request.query.keys())
 	maxParams 	= 4
@@ -112,14 +106,12 @@ def filterUsers_and_or(filter_and):
 
 		query  = composeQuery(URL_Params)
 
-		if filter_and:
-			print "Make an and"
+		if make_and:
 			cursor = db.users.find({"$and":query});
 		else:
 			cursor = db.users.find({"$or":query});
 
 		numResults = cursor.count()
-		print "Make an and"
 
 		if numResults <= 0:
 			return template('error', msg='We didn\'t find any user with that information')
@@ -132,47 +124,22 @@ def filterUsers_and_or(filter_and):
 			return template('table', userList=userList, totalResults=numResults);
 	else:
 		return template('error', msg=msg)
+
+# http://localhost:8080/find_users?gender=Male
+# http://localhost:8080/find_users?gender=Male&year=2009
 
 @get('/find_users')
 def find_users():
 	filter_and = True; # make and with all parameters
 	return filterUsers_and_or(filter_and);
 
+# http://localhost:8080/find_users_or?gender=Male&year=2000
+
 @get('/find_users_or')
 def find_users_or():
 	filter_and = False; # make and with all parameters
 	return filterUsers_and_or(filter_and);
 
-# http://localhost:8080/find_users_or?gender=Male&year=2000
-
-@get('/find_users_or2')
-def find_users_or2():
-
-	URL_Params 	= dict((k,request.query.getall(k)) for k in request.query.keys())
-	maxParams 	= 4
-	validParams = ['_id', 'email', 'gender', 'year']
-
-	(valid, msg)= checkParameters(URL_Params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
-
-	if valid:
-
-		query  = composeQuery(URL_Params)
-		cursor = db.users.find({"$or":query});
-		numResults = cursor.count()
-
-		if numResults <= 0:
-			return template('error', msg='We didn\'t find any user with that information')
-		else:
-			userList = [] # We found some users. Compose a list of users
-
-			for user in cursor:
-				userList.append(user)
-
-			return template('table', userList=userList, totalResults=numResults);
-	else:
-		return template('error', msg=msg)
-
-	   
 @get('/find_like')
 def find_like():
 	# http://localhost:8080/find_like?like=football
