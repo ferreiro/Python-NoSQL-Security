@@ -111,17 +111,16 @@ def filterUsers_and_or(make_and):
 		else:
 			cursor = db.users.find({"$or":query});
 
+		userList   = [] 
 		numResults = cursor.count()
 
-		if numResults <= 0:
-			return template('error', msg='We didn\'t find any user with that information')
-		else:
-			userList = [] # We found some users. Compose a list of users
-
+		if numResults > 0:
+			# We found some users. Compose a list of users
 			for user in cursor:
 				userList.append(user)
 
-			return template('table', userList=userList, totalResults=numResults);
+		return template('table', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
 

@@ -1,40 +1,53 @@
-<h1>Hi! I'm a table</h1>
-
-<style type="text/css">
 	
-.entry {
-	width: 100%;
-	border-bottom:1px dashed #cecece;
-}
-.column {
-	display:  inline-block;
-	padding-right: 10px;
-	margin-right: 10px;
-	border-right:1px dashed #cecece;
-	padding:10px 0;
-}
+	% include('header.tpl')
 
-</style>
-
-<h3>
-	<strong>{{totalResults}}</strong> results found
-</h3>
-
-
-% for c in userList:
+	<h1 class="title">Results for your query:</h1>
 	
-	<div class="entry">
-	% for d in c:
-		<div class="column">
-			% if d == 'likes':
-				% for like in c[d]:
- 					{{like}}
+	% if len(userList) <= 0:
+
+		<h2 class="subtitle">
+			No users found with that parameters values
+		</h2> 
+	% else:
+
+		<h2 class="subtitle">
+			<strong>{{totalResults}}</strong> results found
+		</h2>
+
+		<table style="width:100%">
+			<tbody>
+
+				<tr>
+					<th><p>ID</p></th>
+					<th><p>Email</p></th> 
+					<th><p>Password</p></th>
+					<th><p>Gender</p></th>
+					<th><p>Country</p></th>
+					<th><p>Zip</p></th>
+					<th><p>Year</p></th>
+					<th><p>Likes</p></th>
+				</tr>
+
+				% for user in userList:
+				<tr>
+					<td><p>{{user['_id']}}</p></td>
+					<td><p>{{user['email']}}</p></td> 
+					<td><p>{{user['password']}}</p></td>
+					<td><p>{{user['gender']}}</p></td>
+					<td><p>{{user['address']['country']}}</p></td>
+					<td><p>{{user['address']['zip']}}</p></td>
+					<td><p>{{user['year']}}</p></td>
+					<td><p>
+						% for like in user['likes']:
+						{{like}}
+						% end
+						</p>
+					</td>
+				</tr>
 				% end
-			% else:
-				{{c[d]}}
-			%end
-		</div>
-	%end
-	</div>
-	
-% end
+			</tbody>
+		</table>
+
+	% end
+
+% include('footer.tpl')
