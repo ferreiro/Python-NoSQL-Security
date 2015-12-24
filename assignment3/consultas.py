@@ -96,15 +96,15 @@ and when or, it make an or on the query
 
 def filterUsers_and_or(make_and):
 
-	URL_Params 	= dict((k,request.query.getall(k)) for k in request.query.keys())
+	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
 	maxParams 	= 4
 	validParams = ['_id', 'email', 'gender', 'year']
 
-	(valid, msg)= checkParameters(URL_Params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
+	(valid, msg)= checkParameters(params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
 
 	if valid:
 
-		query  = composeQuery(URL_Params)
+		query  = composeQuery(params)
 
 		if make_and:
 			cursor = db.users.find({"$and":query});
@@ -139,30 +139,34 @@ def find_users_or():
 	filter_and = False; # make and with all parameters
 	return filterUsers_and_or(filter_and);
 
+# http://localhost:8080/find_like?like=football
+
 @get('/find_like')
 def find_like():
-	# http://localhost:8080/find_like?like=football
 	
 	maxParams   = 1 
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['like']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	(valid, msg) = checkParameters(params, maxParams, validParams)
 
-	if isValid:
+	if valid:
+
 		like = params['like']
 		cursor = db.users.find({ 'likes': { '$in' : like }} );
-		if (cursor.count() == 0):
-			return template('error', msg="No user with that like")
-		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-	
-			return template('table', userList=userList)
+		
+		userList   = [] 
+		numResults = cursor.count()
+
+		if numResults > 0:
+			# We found some users. Compose a list of users
+			for user in cursor:
+				userList.append(user)
+
+		return template('table', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
-
 
 @get('/find_country')
 def find_country():
@@ -171,23 +175,26 @@ def find_country():
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['country']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	(valid, msg)= checkParameters(params, maxParams, validParams)
 
-	if isValid:
+	if valid:
+		
 		country = params['country'][0]
 		cursor = db.users.find({'address.country' : country});
-		if (cursor.count() == 0):
-			msg = "No user with that country"
-			return template('error', msg=msg)
-		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-	
-			return template('table', userList=userList)
+
+		userList   = [] 
+		numResults = cursor.count()
+
+		# We found some users. Compose a list of users
+
+		if numResults > 0:
+			for user in cursor:
+				userList.append(user)
+
+		return template('table', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
-
 
 @get('/find_email_year')
 def email_year():
@@ -197,21 +204,22 @@ def email_year():
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['year']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	(valid, msg)= checkParameters(params, maxParams, validParams)
 
-	if isValid:
+	if valid:
+		
 		year = int(params['year'][0])
 		cursor = db.users.find({'year' : year});
-		if (cursor.count() == 0):
-			msg = "No user for this year"
-			return template('error', msg=msg)
-			#return template('error', msg=message)
-		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-	
-			return template('table', userList=userList)
+
+		userList   = []
+		numResults = cursor.count()
+
+		if numResults > 0:
+			for user in cursor:
+				userList.append(user)
+
+		return template('table_special', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
 
@@ -230,19 +238,35 @@ def find_country_limit_sorted():
 		
 		country = params['country'][0]
 		limit = int(params['limit'][0])
-		ord = params['ord'][0] # ord | desc
+		ord = str(params['ord'][0]).lower() # ord | desc
 		
-		cursor = db.users.find({ 'address.country': country }).limit(limit);
-		
-		if (cursor.count() == 0):
-			msg = "No user for this year"
-			return template('error', msg=msg)
+		if ord == 'asc':
+			cursor = db.users.find({ 'address.country': country }).limit(limit).sort(
+				[
+					['year', pymongo.ASCENDING]
+				]
+			)
+		elif ord == 'desc':
+			cursor = db.users.find({ 'address.country': country }).limit(limit).sort(
+				[
+					['year', pymongo.DESCENDING]
+				]
+			)
 		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-	
-			return template('table', userList=userList)
+			return template('error', msg="Sorry!! We can not order by this parameter")
+		
+		userList   = []
+		numResults = cursor.count()
+
+		if numResults > 0:
+			for user in cursor:
+				userList.append(user)
+			
+			if limit != 0 and numResults > limit:
+				numResults = limit # return the number of limits results
+
+		return template('table', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
 

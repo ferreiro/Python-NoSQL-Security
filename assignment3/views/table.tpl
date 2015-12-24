@@ -11,7 +11,7 @@
 	% else:
 
 		<h2 class="subtitle">
-			<strong>{{totalResults}}</strong> results found
+			<strong>{{totalResults}}</strong> results
 		</h2>
 
 		<table style="width:100%">
@@ -20,7 +20,7 @@
 				<tr>
 					<th><p>ID</p></th>
 					<th><p>Email</p></th> 
-					<th><p>Password</p></th>
+					<th><p>Password Hash</p></th>
 					<th><p>Gender</p></th>
 					<th><p>Country</p></th>
 					<th><p>Zip</p></th>
