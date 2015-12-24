@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Autores: XXX
-Grupo YYY
+Autores: Jorge García Ferreiro, Tomaso Inoccenti and Luis
+Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no haber
 colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
@@ -65,107 +65,112 @@ def find_user_id():
 		return template('error', msg=msg)
 
 
+''' 
+	Compose a query: returns array of Dictionaries
+	where each element is each of the parameters we want to ask
+	Structure: query = [ {"_id":_id},{"name":name}, ] 
+'''
+
+def composeQuery(params):
+
+	query = [] # List of dictionaries (json objects)
+
+	for key in params:
+		elem  = {}
+		value = params[key][0] # Params can have multiple values for each array element
+
+		if key == 'year':
+			value = int(value) # Cast to integer when year.
+
+		elem[key] = value  # save value as dictionary
+		query.append(elem) # push dictionary to query
+
+	return query
+
+
+
+
 # http://localhost:8080/find_users?gender=Male
 # http://localhost:8080/find_users?gender=Male&year=2009
 
-@get('/find_users')
-def find_users():
+''' 
+This method can be used for find_users_or or find_users
+the only that changes is that when you pass filter_and as true
+the program will make an and of all the paramters 
+and when or, it make an or on the query
+'''
 
+def filterUsers_and_or(filter_and):
+
+	URL_Params 	= dict((k,request.query.getall(k)) for k in request.query.keys())
 	maxParams 	= 4
-	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['_id', 'email', 'gender', 'year']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
-	
-	if isValid:
-		_id =""
-		email =""
-		gender =""
-		year =-1
+	(valid, msg)= checkParameters(URL_Params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
 
-		query = []
+	if valid:
 
-		for p in params:
-			# Structure [{"_id":_id}]
+		query  = composeQuery(URL_Params)
 
-			elem = {}
-			value = params[p][0]
-
-			if p == 'year':
-				value = int(value)
-
-			elem[p] = value
-
-			query.append(elem);
-
-		print query
-
-
-		cursor = db.users.find({"$and":query})
-
-		if (cursor.count() == 0):
-			return template('error', msg="Nothing found with your criteria")
+		if filter_and:
+			print "Make an and"
+			cursor = db.users.find({"$and":query});
 		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-		
-			return template('table', userList=userList)
+			cursor = db.users.find({"$or":query});
+
+		numResults = cursor.count()
+		print "Make an and"
+
+		if numResults <= 0:
+			return template('error', msg='We didn\'t find any user with that information')
+		else:
+			userList = [] # We found some users. Compose a list of users
+
+			for user in cursor:
+				userList.append(user)
+
+			return template('table', userList=userList, totalResults=numResults);
 	else:
 		return template('error', msg=msg)
 
-	# Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
-	# Get user with that shit of parameters.
-
-
-# http://localhost:8080/find_users_or?gender=Male&year=2000
+@get('/find_users')
+def find_users():
+	filter_and = True; # make and with all parameters
+	return filterUsers_and_or(filter_and);
 
 @get('/find_users_or')
 def find_users_or():
-	
+	filter_and = False; # make and with all parameters
+	return filterUsers_and_or(filter_and);
+
+# http://localhost:8080/find_users_or?gender=Male&year=2000
+
+@get('/find_users_or2')
+def find_users_or2():
+
+	URL_Params 	= dict((k,request.query.getall(k)) for k in request.query.keys())
 	maxParams 	= 4
-	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['_id', 'email', 'gender', 'year']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
-	
-	if isValid:
-		_id =""
-		email =""
-		gender =""
-		year =-1
+	(valid, msg)= checkParameters(URL_Params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
 
-		for p in params:
-			if p == '_id':
-				_id = params['_id'][0]
-			elif p == 'email':
-				email = params['email'][0]
-			elif p == 'gender':
-				gender = params['gender'][0]
-			elif p == 'year':
-				year = params['year'][0]
+	if valid:
 
-		cursor = db.users.find({"$or":[ 
-			{"_id":_id},
-			{"email":email},
-			{"gender":gender},
-			{"year":int(year)}
-		]})
+		query  = composeQuery(URL_Params)
+		cursor = db.users.find({"$or":query});
+		numResults = cursor.count()
 
-		if (cursor.count() == 0):
-			return template('error', msg="Nothing found with your criteria")
+		if numResults <= 0:
+			return template('error', msg='We didn\'t find any user with that information')
 		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-		
-			return template('table', userList=userList)
+			userList = [] # We found some users. Compose a list of users
+
+			for user in cursor:
+				userList.append(user)
+
+			return template('table', userList=userList, totalResults=numResults);
 	else:
 		return template('error', msg=msg)
-
-	# Antes de la tabla aparecera un mensaje indicando el número de resultados encontrados.
-	# Get user with that shit of parameters.
-
 
 	   
 @get('/find_like')

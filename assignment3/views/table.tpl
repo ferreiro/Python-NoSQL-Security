@@ -16,6 +16,11 @@
 
 </style>
 
+<h3>
+	<strong>{{totalResults}}</strong> results found
+</h3>
+
+
 % for c in userList:
 	
 	<div class="entry">
