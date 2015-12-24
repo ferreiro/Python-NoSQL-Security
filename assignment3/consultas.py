@@ -35,18 +35,19 @@ from pymongo import MongoClient # install MongoClient
 from pymongo import ReturnDocument
 
 client 	= MongoClient()
-db 		= client['giw']
+db 		= client['giw2']
+
 
 # http://localhost:8080/find_user_id?_id=user_1
-
 @get('/find_user_id')
 def find_user_id():
 	
 	maxParams   = 1 
 	params  	= dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['_id']
+	allRequired = True
 
-	(valid, msg)= checkParameters(params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
+	(valid, msg)= checkParameters(params, maxParams, validParams, allRequired) # Check if URL_ parameters are correct. Returning true/false and a message
 
 	if valid:
 
@@ -65,90 +66,29 @@ def find_user_id():
 	else:
 		return template('error', msg=msg)
 
-''' 
-	Compose a query: returns array of Dictionaries
-	where each element is each of the parameters we want to ask
-	Structure: query = [ {"_id":_id},{"name":name}, ] 
-'''
-
-def composeQuery(params):
-
-	query = [] # List of dictionaries (json objects)
-
-	for key in params:
-		elem  = {}
-		value = params[key][0] # Params can have multiple values for each array element
-
-		if key == 'year':
-			value = int(value) # Cast to integer when year.
-
-		elem[key] = value  # save value as dictionary
-		query.append(elem) # push dictionary to query
-
-	return query
-
-''' 
-This method can be used for find_users_or or find_users
-the only that changes is that when you pass filter_and as true
-the program will make an and of all the paramters 
-and when or, it make an or on the query
-'''
-
-def filterUsers_and_or(make_and):
-
-	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
-	maxParams 	= 4
-	validParams = ['_id', 'email', 'gender', 'year']
-
-	(valid, msg)= checkParameters(params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
-
-	if valid:
-
-		query  = composeQuery(params)
-
-		if make_and:
-			cursor = db.users.find({"$and":query});
-		else:
-			cursor = db.users.find({"$or":query});
-
-		userList   = [] 
-		numResults = cursor.count()
-
-		if numResults > 0:
-			# We found some users. Compose a list of users
-			for user in cursor:
-				userList.append(user)
-
-		return template('table', userList=userList, totalResults=numResults);
-
-	else:
-		return template('error', msg=msg)
-
 # http://localhost:8080/find_users?gender=Male
 # http://localhost:8080/find_users?gender=Male&year=2009
-
 @get('/find_users')
 def find_users():
 	filter_and = True; # make and with all parameters
 	return filterUsers_and_or(filter_and);
 
 # http://localhost:8080/find_users_or?gender=Male&year=2000
-
 @get('/find_users_or')
 def find_users_or():
 	filter_and = False; # make and with all parameters
 	return filterUsers_and_or(filter_and);
 
 # http://localhost:8080/find_like?like=football
-
 @get('/find_like')
 def find_like():
 	
 	maxParams   = 1 
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['like']
+	allRequired = True
 
-	(valid, msg) = checkParameters(params, maxParams, validParams)
+	(valid, msg) = checkParameters(params, maxParams, validParams, allRequired)
 
 	if valid:
 
@@ -168,14 +108,16 @@ def find_like():
 	else:
 		return template('error', msg=msg)
 
+# http://localhost:8080/find_country?country=Spain
 @get('/find_country')
 def find_country():
-	# http://localhost:8080/find_country?country=Spain
+	
 	maxParams   = 1 
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['country']
+	allRequired = True
 
-	(valid, msg)= checkParameters(params, maxParams, validParams)
+	(valid, msg)= checkParameters(params, maxParams, validParams, allRequired)
 
 	if valid:
 		
@@ -186,7 +128,6 @@ def find_country():
 		numResults = cursor.count()
 
 		# We found some users. Compose a list of users
-
 		if numResults > 0:
 			for user in cursor:
 				userList.append(user)
@@ -196,15 +137,16 @@ def find_country():
 	else:
 		return template('error', msg=msg)
 
+# http://localhost:8080/find_email_year?year=1992
 @get('/find_email_year')
 def email_year():
-	# http://localhost:8080/find_email_year?year=1992
 		
 	maxParams   = 1 
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['year']
+	allRequired = True
 
-	(valid, msg)= checkParameters(params, maxParams, validParams)
+	(valid, msg)= checkParameters(params, maxParams, validParams, allRequired)
 
 	if valid:
 		
@@ -224,15 +166,16 @@ def email_year():
 		return template('error', msg=msg)
 
 
+# http://localhost:8080/find_country_limit_sorted?country=Spain&limit=20&ord=asc
 @get('/find_country_limit_sorted')
 def find_country_limit_sorted():
-	# http://localhost:8080/find_country_limit_sorted?country=Spain&limit=20&ord=asc
 	
 	maxParams   = 3
 	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['country', 'limit', 'ord']
+	allRequired = True
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	(isValid, msg) = checkParameters(params, maxParams, validParams, allRequired)
 
 	if isValid:
 		
@@ -284,7 +227,7 @@ def find_country_limit_sorted():
 	2. MaxParams: Integer of maximun different keys (parameters name) it accepts.
 	3. ValidParams: Dictionary of valid parameters accepted: validParams = { 'name', 'surname' }
 '''		
-def checkParameters(params, maxParams, validParams):
+def checkParameters(params, maxParams, validParams, allRequired):
 	
 	# Error type checking | source: http://stackoverflow.com/questions/2225038/determine-the-type-of-an-object
 	if type(params) is not dict:
@@ -297,6 +240,8 @@ def checkParameters(params, maxParams, validParams):
 	# Now checks if the passed number of parameters are accepted.
 	if len(params) == 0:
 		return (False,'Empty Parameters. We only find when some parameters are provided')
+	elif allRequired and len(params) < maxParams:
+		return (False,'You don\'t provide all the parameters we need')
 	elif len(params) > maxParams:
 		return (False,'We don\'t accept more than ' + str(maxParams) + ' params passed by url')
 
@@ -315,6 +260,70 @@ def checkParameters(params, maxParams, validParams):
 			continue # The key params is valid
 
 	return (True, 'Params are correct')
+
+
+
+''' 
+	Compose a query: returns array of Dictionaries
+	where each element is each of the parameters we want to ask
+	Structure: query = [ {"_id":_id},{"name":name}, ] 
+'''
+
+def composeQuery(params):
+
+	query = [] # List of dictionaries (json objects)
+
+	for key in params:
+		elem  = {}
+		value = params[key][0] # Params can have multiple values for each array element
+
+		if key == 'year':
+			value = int(value) # Cast to integer when year.
+
+		elem[key] = value  # save value as dictionary
+		query.append(elem) # push dictionary to query
+
+	return query
+
+''' 
+This method can be used for find_users_or or find_users
+the only that changes is that when you pass filter_and as true
+the program will make an and of all the paramters 
+and when or, it make an or on the query
+'''
+
+def filterUsers_and_or(make_and):
+
+	params 		= dict((k,request.query.getall(k)) for k in request.query.keys())
+	maxParams 	= 4
+	validParams = ['_id', 'email', 'gender', 'year']
+	allRequired = False # we accept less than maxParams as valid URL
+
+	(valid, msg)= checkParameters(params, maxParams, validParams, allRequired) # Check if URL_ parameters are correct. Returning true/false and a message
+
+	if valid:
+
+		query  = composeQuery(params)
+
+		if make_and:
+			cursor = db.users.find({"$and":query});
+		else:
+			cursor = db.users.find({"$or":query});
+
+		userList   = [] 
+		numResults = cursor.count()
+
+		if numResults > 0:
+			# We found some users. Compose a list of users
+			for user in cursor:
+				userList.append(user)
+
+		return template('table', userList=userList, totalResults=numResults);
+
+	else:
+		return template('error', msg=msg)
+
+
 
 ###############################################################################
 ###############################################################################
