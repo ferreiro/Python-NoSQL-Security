@@ -37,33 +37,33 @@ from pymongo import ReturnDocument
 client 	= MongoClient()
 db 		= client['giw']
 
+# http://localhost:8080/find_user_id?_id=user_1
+
 @get('/find_user_id')
 def find_user_id():
-	# http://localhost:8080/find_user_id?_id=user_1
-   
+	
 	maxParams   = 1 
-	params      = dict((k,request.query.getall(k)) for k in request.query.keys())
+	params  	= dict((k,request.query.getall(k)) for k in request.query.keys())
 	validParams = ['_id']
 
-	(isValid, msg) = checkParameters(params, maxParams, validParams)
+	(valid, msg)= checkParameters(params, maxParams, validParams) # Check if URL_ parameters are correct. Returning true/false and a message
 
-	if isValid:
-		userID=params['_id'][0]
+	if valid:
+
+		userID = params['_id'][0]
 		cursor = db.users.find({'_id' : userID});
-		if (cursor.count() == 0):
-			msg = "No user with that ID"
-			return template('error', msg=msg)
-			#return template('error', msg=message)
-		else:
-			userList = []
-			for c in cursor:
-				userList.append(c)
-	
-			return str(userList)
-			#return template('table', content=userList)
+		
+		userList   = [] 
+		numResults = cursor.count()
+
+		if numResults > 0:
+			for user in cursor:
+				userList.append(user) # We found some users. Compose a list of users
+
+		return template('table', userList=userList, totalResults=numResults);
+
 	else:
 		return template('error', msg=msg)
-
 
 ''' 
 	Compose a query: returns array of Dictionaries
