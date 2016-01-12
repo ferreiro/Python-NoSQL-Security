@@ -40,21 +40,17 @@ db 		= client['giw']
 @get('/users_by_country_mr')
 def users_by_country_mr():
 
-
 	# It's not working yet...!!
 	# do not copy this part until is finished.
 	# or try to implement your code ;)
 
-	map = Code("""
+	mapper = Code("""
 			function countryMap() {
-				for (var i = 0; i < country.length; i++) {
-					// emit every country with count of one.
-					emit(country[i], { count: 1 });
-				}
+				emit(this.country, { count: 1 });
 			}
 			""")
 
-	reduce = Code("""
+	reducer = Code("""
 			function countryReduce(key, values) {
 				var total = 0;
 
@@ -66,10 +62,14 @@ def users_by_country_mr():
 			}
 			""")
 
-	results = db.users.map_reduce(map, reduce)
-
-	for result in results.find():
+	results = db.users.inline_map_reduce(mapper, reducer)
+	
+	for result in results:
 		print result
+		
+	#results = db.users.map_reduce(mapper, reducer, "myresults")
+	#for result in results.find():
+	#	print result
 
 # Aggregation Pipeline: usuarios en cada pais (orden descendente por numero
 # de usuarios).
