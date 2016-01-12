@@ -74,8 +74,6 @@ def users_by_country_agg():
 	]
 	results= list(db.users.aggregate(pipeline))
 	return template('table_pipeline', results=results, count=len(results));
-	#db.command('aggregate', 'users', pipeline=pipeline, explain=True)
-
 
 # MapReduce: gasto total en cada pais.
 @get('/spending_by_country_mr')
@@ -117,7 +115,15 @@ def spending_by_country_mr():
 # del pais).
 @get('/spending_by_country_agg')
 def spending_by_country_agg():
-	pass
+	
+	pipeline = [
+		{"$unwind": "$orders" },
+		{"$group": {"_id": "$country", "count": {"$sum": "$orders.total" }}},
+		{"$sort": SON([("count", 1), ("_id", -1)])}
+	]
+	results= list(db.users.aggregate(pipeline))
+	return template('table_pipeline', results=results, count=len(results));
+
 
 
 # MapReduce: gasto total realizado por las mujeres que han realizdo EXACTAMENTE
