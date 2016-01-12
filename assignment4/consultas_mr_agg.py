@@ -70,7 +70,7 @@ def users_by_country_agg():
 	
 	pipeline = [
 		{"$group": {"_id": "$country", "count": {"$sum": 1}}},
-		{"$sort": SON([("count", 1), ("_id", -1)])}
+		{"$sort": SON([("count", -1), ("_id", -1)])}
 	]
 	results= list(db.users.aggregate(pipeline))
 	return template('table_pipeline', results=results, count=len(results));
