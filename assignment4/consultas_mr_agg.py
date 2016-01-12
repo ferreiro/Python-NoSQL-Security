@@ -27,6 +27,7 @@ otros ni haberlo obtenido de una fuente externa.
 
 # Importaciones
 import pymongo
+import math
 
 from bson.code import Code
 from bottle import get, run, request, template
@@ -39,10 +40,6 @@ db 		= client['giw']
 # MapReduce: usuarios en cada pais.
 @get('/users_by_country_mr')
 def users_by_country_mr():
-
-	# It's not working yet...!!
-	# do not copy this part until is finished.
-	# or try to implement your code ;)
 
 	mapper = Code("""
 			function countryMap() {
@@ -58,18 +55,12 @@ def users_by_country_mr():
 					total += values[i].count;
 				}
 
-				return { count: total }
+				return { count: Math.round(total) }
 			}
 			""")
 
 	results = db.users.inline_map_reduce(mapper, reducer)
-	
-	for result in results:
-		print result
-		
-	#results = db.users.map_reduce(mapper, reducer, "myresults")
-	#for result in results.find():
-	#	print result
+	return template('table', results=results, count=len(results));
 
 # Aggregation Pipeline: usuarios en cada pais (orden descendente por numero
 # de usuarios).
