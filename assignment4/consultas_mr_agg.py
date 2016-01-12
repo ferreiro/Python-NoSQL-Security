@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Autores: Jorge Ferreiro, Tommaso Innocenti & Luis
-Grupo YYY
+Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no haber
 colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
@@ -26,7 +26,11 @@ otros ni haberlo obtenido de una fuente externa.
 """
 
 # Importaciones
-from bottle import get, run
+import pymongo
+
+from bottle import get, run, request, template
+from pymongo import MongoClient # install MongoClient
+from pymongo import ReturnDocument
 
 
 # MapReduce: usuarios en cada pais.
