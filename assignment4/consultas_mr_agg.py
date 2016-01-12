@@ -81,7 +81,45 @@ def users_by_country_agg():
 # MapReduce: gasto total en cada pais.
 @get('/spending_by_country_mr')
 def spending_by_country_mr():
-    pass
+
+	hi = Code("""
+		function test() {
+			return this.country;
+		}
+	""");
+
+	mapper = Code("""
+			function countryMap() 
+			{
+				var total = 0;
+
+				
+				for (var i = 0; i < this.orders.size(); i++) {
+					console.log(orders[i]['total'])
+					total += orders[i]['total'] 
+				}
+				
+
+				emit(this.country, { count: total });
+			}
+			""")
+
+	reducer = Code("""
+			function countryReduce(key, values) {
+				var total = 0;
+
+				for (var i = 0; i < values.length; i++) {
+					total += values[i].count;
+				}
+
+				return { count: total }
+			}
+			""")
+
+	results = db.users.inline_map_reduce(mapper, reducer)
+	
+	for result in results:
+		print result
 
 
 # Aggregation Pipeline: gasto total en cada pais (orden descendente por nombre
