@@ -8,6 +8,22 @@ colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
 otros ni haberlo obtenido de una fuente externa.
 """
 
+"""
+	Implicit Schema
+	+------------------------------------------------------+
+	| key                | types  | occurrences | percents |
+	| ------------------ | ------ | ----------- | -------- |
+	| _id                | String |           1 |    100.0 |
+	| country            | String |           1 |    100.0 |
+	| gender             | String |           1 |    100.0 |
+	| orders             | Array  |           1 |    100.0 |
+	| orders.XX.item     | String |           1 |    100.0 |
+	| orders.XX.quantity | Number |           1 |    100.0 |
+	| orders.XX.total    | Number |           1 |    100.0 |
+	+------------------------------------------------------+
+
+	orders has an array, where each order has (item, quantity and total)
+"""
 
 # Importaciones
 from bottle import get, run
