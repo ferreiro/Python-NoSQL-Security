@@ -28,16 +28,48 @@ otros ni haberlo obtenido de una fuente externa.
 # Importaciones
 import pymongo
 
+from bson.code import Code
 from bottle import get, run, request, template
 from pymongo import MongoClient # install MongoClient
 from pymongo import ReturnDocument
 
+client 	= MongoClient()
+db 		= client['giw']
 
 # MapReduce: usuarios en cada pais.
 @get('/users_by_country_mr')
 def users_by_country_mr():
-    pass
 
+
+	# It's not working yet...!!
+	# do not copy this part until is finished.
+	# or try to implement your code ;)
+
+	map = Code("""
+			function countryMap() {
+				for (var i = 0; i < country.length; i++) {
+					// emit every country with count of one.
+					emit(country[i], { count: 1 });
+				}
+			}
+			""")
+
+	reduce = Code("""
+			function countryReduce(key, values) {
+				var total = 0;
+
+				for (var i = 0; i < values.length; i++) {
+					total += values[i].count;
+				}
+
+				return { count: total }
+			}
+			""")
+
+	results = db.users.map_reduce(map, reduce)
+
+	for result in results.find():
+		print result
 
 # Aggregation Pipeline: usuarios en cada pais (orden descendente por numero
 # de usuarios).
