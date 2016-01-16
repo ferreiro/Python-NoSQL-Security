@@ -6,7 +6,9 @@ Grupo 12
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no haber
 colaborado de ninguna manera con otros grupos, haber compartido el ćodigo con
 otros ni haberlo obtenido de una fuente externa.
+"""
 
+"""
 	Implicit Schema
 	+------------------------------------------------------+
 	| key                | types  | occurrences | percents |
@@ -122,66 +124,45 @@ def spending_by_country_agg():
 	results= list(db.users.aggregate(pipeline))
 	return template('table_pipeline', results=results, count=len(results));
 
+
+
 # MapReduce: gasto total realizado por las mujeres que han realizdo EXACTAMENTE
 # 3 compras.
 @get('/spending_female_3_orders_mr')
 def spending_female_3_orders_mr():
-	
 	mapper = Code("""
-			function countryMap() 
-			{	
-				if (this.gender == "Female") {
-					var total = 0;
-					var orders = this.orders;
+			function spendingMap()
+			{
+				var total = 0;
+				var orders = this.orders;
 
-					if (orders) {
-						if (orders.length == 3) {
-							for (i=0; i < orders.length; i++) {
-								total += orders[i].total
-							}
-						}
+				if (orders) {
+					for (i=0; i < orders.length; i++) {
+						total += orders[i].total
 					}
-					else {
-						print("No orders biach!")
-					}
-					
-					emit(this.gender, { count: total });
 				}
+
+				emit("Total", { count: total });
 			}
 			""")
-
 	reducer = Code("""
-			function countryReduce(key, values) {
+			function spendingReduce(key, values) {
 				var total = 0;
-
 				for (var i = 0; i < values.length; i++) {
 					total += values[i].count;
 				}
-
 				return { count: total }
 			}
 			""")
-
-	results = db.users.inline_map_reduce(mapper, reducer)
+	results = db.users.inline_map_reduce(mapper, reducer, query={"orders":{"$size":3}, "gender":"Female"})
 	return template('table_map_reduce', results=results, count=len(results));
+
 
 # Aggregation Pipeline: gasto total realizado por las mujeres que han realizdo 
 # EXACTAMENTE 3 compras.
 @get('/spending_female_3_orders_agg')
 def spending_female_3_orders_agg():
-	pipeline = [
-		{   
-			"$match" : { 
-				"gender" : "Female",
-				"orders": { "$size" : 3 }
-			}
-		},
-		{ "$unwind": "$orders" },
-		{ "$group": {"_id": "$gender", "count": {"$sum": "$orders.total" }}},
-		{ "$sort": SON([("count", 1), ("_id", -1)])}
-	]
-	results= list(db.users.aggregate(pipeline))
-	return template('table_pipeline', results=results, count=len(results));
+	pass
 
 	
 ###############################################################################
