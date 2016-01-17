@@ -26,20 +26,18 @@ orders is an array with attributes (item, quantity and total)
 
 # Importaciones
 import pymongo
-import math
-
 from bottle import get, run, template, route, static_file
 from pymongo import MongoClient 
 from bson.son import SON
 from bson.code import Code
 
-client 	= MongoClient()
-db 		= client['giw']
-
-# Assets: in order to use images on the view
+# Assets: adding support to use images on the view
 @route('/<filename:re:.*\.(jpg|png|gif|ico)>')
 def images(filename):
     return static_file(filename, root='views/')
+
+client 	= MongoClient()
+db 		= client['giw']
 
 # MapReduce: usuarios en cada pais.
 @get('/users_by_country_mr')
@@ -85,37 +83,37 @@ def users_by_country_agg():
 def spending_by_country_mr():
 
 	mapper = Code("""
-			function mapper() {
-				var total = 0;
-				var orders = this.orders;
+		function mapper() {
+			var total = 0;
+			var orders = this.orders;
 
-				if (orders) { // Don't access null orders
-					for (i=0; i < orders.length; i++) {
-						total += orders[i].total
-					}
+			if (orders) { // Don't access null orders
+				for (i=0; i < orders.length; i++) {
+					total += orders[i].total
 				}
-
-				emit(this.country, { count: total });
 			}
-			""")
+
+			emit(this.country, { count: total });
+		}
+	""")
 
 	reducer = Code("""
-			function reducer(key, values) {
-				var total = 0;
+		function reducer(key, values) {
+			var total = 0;
 
-				for (var i = 0; i < values.length; i++) {
-					total += values[i].count;
-				}
-
-				return { count: total }
+			for (var i = 0; i < values.length; i++) {
+				total += values[i].count;
 			}
-			""")
+
+			return { count: total }
+		}
+	""")
 
 	results = db.users.inline_map_reduce(mapper, reducer)
 	return template('table_map_reduce', results=results, count=len(results));
 
 # Aggregation Pipeline: 
-# gasto total en cada pais (orden descendente por nombre del pais).
+# gasto total en cada pais (orden ascendente por el nombre del pais)
 @get('/spending_by_country_agg')
 def spending_by_country_agg():
 	
@@ -136,37 +134,36 @@ def spending_female_3_orders_mr():
 	total = 0
 
 	mapper = Code("""
-			function spendingMap() {	
-				if (this.gender == "Female") {
-					var total = 0;
-					var orders = this.orders;
+		function spendingMap() {	
+			if (this.gender == "Female") {
+				var total = 0;
+				var orders = this.orders;
 
-					if (orders) {
-						if (orders.length == 3) {
-							for (i=0; i < orders.length; i++) {
-								total += orders[i].total
-							}
+				if (orders) {
+					if (orders.length == 3) {
+						for (i=0; i < orders.length; i++) {
+							total += orders[i].total
 						}
-						emit(this.gender, total);
 					}
+					emit(this.gender, total);
 				}
 			}
-			""")
+		}
+	""")
 
 	reducer = Code("""
-			function spendingReduce(key, values) {
-				var total = 0;
+		function spendingReduce(key, values) {
+			var total = 0;
 
-				for (var i = 0; i < values.length; i++) {
-					total += values[i]
-				}
-
-				return total;
+			for (var i = 0; i < values.length; i++) {
+				total += values[i]
 			}
-			""")
+
+			return total;
+		}
+	""")
 
 	results = db.users.inline_map_reduce(mapper, reducer)
-	print results
 	if len(results) > 0: total= results[0]['value'] # set total with the result of the query
 	return template('totalfemale', total=total);
 
@@ -196,7 +193,6 @@ def spending_female_3_orders_agg():
 	]
 	
 	results	= list(db.users.aggregate(pipeline))
-	print results
 	if len(results) > 0: total= results[0]['count'] # set total with the result of the query
 
 	return template('totalfemale', total=total);
