@@ -166,6 +166,7 @@ def spending_female_3_orders_mr():
 			""")
 
 	results = db.users.inline_map_reduce(mapper, reducer)
+	print results
 	if len(results) > 0: total= results[0]['value'] # set total with the result of the query
 	return template('totalfemale', total=total);
 
@@ -195,6 +196,7 @@ def spending_female_3_orders_agg():
 	]
 	
 	results	= list(db.users.aggregate(pipeline))
+	print results
 	if len(results) > 0: total= results[0]['count'] # set total with the result of the query
 
 	return template('totalfemale', total=total);
