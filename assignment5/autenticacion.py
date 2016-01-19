@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Autores: XXX
-Grupo YYY
+Autores: Jorge Ferreiro, Tomasso Innocenti and Luis
+Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no 
 haber colaborado de ninguna manera con otros grupos, haber compartido el ćodigo 
@@ -10,16 +11,14 @@ con otros ni haberlo obtenido de una fuente externa.
 
 from bottle import run, post, get
 # Resto de importaciones
+import hashlib
 import pymongo
-from bottle import request, route, run, template, response, static_file
-from pymongo import MongoClient 
-from bson.son import SON
-from bson.code import Code
+import onetimepass as otp
 import random
 import string
-import hashlib
 from passlib.hash import sha256_crypt
-import onetimepass as otp
+from bottle import request, route, run, template, response, static_file
+from pymongo import MongoClient
 
 client  = MongoClient()
 db      = client['giw']
@@ -64,8 +63,11 @@ def images(filename):
 def fonts(filename):
 	return static_file(filename, root='static/')
 
+#################################
+########## ENCRYPTION ###########
+########## SECURITY   ###########
+#################################
 
-# Returns the hash
 def encryptPass(password):
 	return sha256_crypt.encrypt(password)
 
