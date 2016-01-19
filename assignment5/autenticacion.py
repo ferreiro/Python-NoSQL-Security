@@ -73,6 +73,25 @@ def encryptPass(password):
 def validPassword(password, hash):
 	return sha256_crypt.verify(password, hash);
 
+# Genera una cadena aleatoria de 16 caracteres a escoger entre las 26 
+# letras mayúsculas del inglés y los dígitos 2, 3, 4, 5, 6 y 7. 
+
+def random_char(n):
+	chars = string.ascii_uppercase + "234567"
+	return ''.join(random.choice(chars) for x in range(n))
+
+##############
+# APARTADO A #
+##############
+
+@get('/')
+def home():
+	i = 0
+
+	while i < 10:
+		print random_char(16)
+		i += 1
+
 @get('/signup')
 def signup_view():
 	return template('signup_login', signup=True);
