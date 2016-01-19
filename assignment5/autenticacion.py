@@ -136,9 +136,10 @@ def gen_secret():
     #
     # Ejemplo:
     # >>> gen_secret()
-    # '7ZVVBSKR22ATNU26' 
+    # '7ZVVBSKR22ATNU26'
+	
 	secret = random_char(16)
-    return secret; 
+    return secret;
     
     
 def gen_gauth_url(app_name, username, secret):
@@ -153,7 +154,9 @@ def gen_gauth_url(app_name, username, secret):
     #
     # Más información en: 
     #   https://github.com/google/google-authenticator/wiki/Key-Uri-Format
-    pass
+	
+    gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
+	return gauth_url;
         
 
 def gen_qrcode_url(gauth_url):
@@ -180,7 +183,6 @@ def login_totp():
 if __name__ == "__main__":
     run(host='localhost',port=8080,debug=True)
 
-
 ###############################################################################
 ################# Funciones auxiliares a partir de este punto #################
 ###############################################################################
@@ -188,3 +190,4 @@ if __name__ == "__main__":
 def random_char(n):
 	chars = string.ascii_uppercase + "1234567890"
 	return ''.join(random.choice(chars) for x in range(n))
+	
