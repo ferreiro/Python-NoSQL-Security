@@ -141,21 +141,22 @@ def login_view():
 	return template('signup_login', signup=False);
 
 @post('/login')
-def login(nickname, password):
+def login():
 	
+	username = request.forms.get('username')
+	password = request.forms.get('password')
 
+	user = db.users.find_one({ 
+		"_id" : username 
+	});
 
-	"""
-	message = ""
-	found_user = db.users.find_one({"nickname":nickname})
-	if (!found_user):
-		message = "Usuario o contraseña incorrectos"
-	else if(found_user['password']== password):
-		message = "Usuario o contraseña incorrectos"
-	else:
-		message = "Bienvenido %s" %(nickname)
-	return template ("login", message = message) 
-	"""
+	if not user: # Username doesn't exists
+		return template('result', message='Usuario o contraseña incorrectos');
+ 
+	if not validPassword(password, user['password']): # Old password doesnt match
+	 	return template('result', message='Usuario o contraseña incorrectos');
+
+	return template('welcome', user=user);
 
 ##############
 # APARTADO B #
