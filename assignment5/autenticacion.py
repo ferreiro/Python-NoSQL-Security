@@ -250,8 +250,6 @@ def signup_totp():
 	gauth_url   = gen_gauth_url(APP_NAME, User['_id'], User['secretKey']);
 	qrcode      = gen_qrcode_url(gauth_url)
 
-	print qrcode
-
 	return template('welcome_secondFactor', user=User, qrcode=qrcode);
 	  
 @get('/login_totp')
