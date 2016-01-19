@@ -19,10 +19,12 @@ import random
 import string
 import hashlib
 from passlib.hash import sha256_crypt
+import onetimepass as otp
 
 client 	= MongoClient()
 db 		= client['giw']
 
+APP_NAME = "sudoNotes"
 
 """
 User Schema
@@ -62,9 +64,6 @@ def images(filename):
 def fonts(filename):
     return static_file(filename, root='static/')
 
-##############
-# APARTADO A #
-##############
 
 # Returns the hash
 def encryptPass(password):
@@ -73,24 +72,9 @@ def encryptPass(password):
 def validPassword(password, hash):
 	return sha256_crypt.verify(password, hash);
 
-# Genera una cadena aleatoria de 16 caracteres a escoger entre las 26 
-# letras mayúsculas del inglés y los dígitos 2, 3, 4, 5, 6 y 7. 
-
-def random_char(n):
-	chars = string.ascii_uppercase + "234567"
-	return ''.join(random.choice(chars) for x in range(n))
-
 ##############
 # APARTADO A #
 ##############
-
-@get('/')
-def home():
-	i = 0
-
-	while i < 10:
-		print random_char(16)
-		i += 1
 
 @get('/signup')
 def signup_view():
@@ -99,9 +83,12 @@ def signup_view():
 @post('/signup')
 def signup():
 
-	username = request.forms.get('username')
-	password = request.forms.get('password')
-	password2 = request.forms.get('password2')	
+	username 	= request.forms.get('username')
+	name 		= request.forms.get('name')
+	country 	= request.forms.get('country')
+	email 		= request.forms.get('email');
+	password 	= request.forms.get('password')
+	password2 	= request.forms.get('password2')	
 
 	if password != password2:
 		return template('result', message="Password doesn't match");
@@ -110,20 +97,18 @@ def signup():
 
 	if result.count() > 0:
 		return template('result', message="Username is already registered on our database");
-
-	# Valid user to this point. Insert it on the database.
-
+ 
 	encryptedPassword = encryptPass(password);
 
 	User = {
-		"_id" : username,
-		"name": request.forms.get('name'),
-		"country" : request.forms.get('country'),
-		"email": request.forms.get('email'),
-		"password" : encryptedPassword
+		"_id" 		: username,
+		"name"		: name,
+		"country" 	: country,
+		"email"		: email,
+		"password" 	: encryptedPassword
 	}  
 
-	db.users.insert_one(User);
+	db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
 	return template('welcome', user=User);
  
 @get('/change_password')
@@ -181,6 +166,12 @@ def login():
 # APARTADO B #
 ##############
 
+@get('/')
+def home():
+	secret = gen_secret();
+	url= gen_gauth_url("app_name", "jgferreiro", "123")
+	print gen_qrcode_url(url)
+	print "Hola"
 
 def gen_secret():
     # Genera una cadena aleatoria de 16 caracteres a escoger entre las 26 
@@ -189,9 +180,9 @@ def gen_secret():
     # Ejemplo:
     # >>> gen_secret()
     # '7ZVVBSKR22ATNU26'
-	 
-    return random_char(16);
-    
+    length = 16
+    chars = string.ascii_uppercase + "234567"
+    return ''.join(random.choice(chars) for x in range(length))
     
 def gen_gauth_url(app_name, username, secret):
     # Genera la URL para insertar una cuenta en Google Authenticator
@@ -208,7 +199,6 @@ def gen_gauth_url(app_name, username, secret):
 	
 	gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
 	return gauth_url;
-        
 
 def gen_qrcode_url(gauth_url):
     # Genera la URL para generar el código QR que representa 'gauth_url'
@@ -217,18 +207,60 @@ def gen_qrcode_url(gauth_url):
     # Ejemplo:
     # >>> gen_qrcode_url('otpauth://totp/pepe_lopez?secret=JBSWY3DPEHPK3PXP&issuer=GIW_grupoX')
     # 'http://api.qrserver.com/v1/create-qr-code/?data=otpauth%3A%2F%2Ftotp%2Fpepe_lopez%3Fsecret%3DJBSWY3DPEHPK3PXP%26issuer%3DGIW_grupoX'
-    pass
+    base = "http://api.qrserver.com/v1/create-qr-code/?data="
+    return base + str(gauth_url)
     
+
+@get('/signup_totp')
+def login_view(): 
+	return template('signup_login_totp', signup=True);
+
 @post('/signup_totp')
 def signup_totp():
-    pass
-        
+    global APP_NAME # using when exporting the QR!!!
+
+    username 	= request.forms.get('username')
+    name 		= request.forms.get('name')
+    country 	= request.forms.get('country')
+    email 		= request.forms.get('email');
+    password 	= request.forms.get('password')
+    password2 	= request.forms.get('password2')	
+
+    if password != password2:
+    	return template('result', message="Password doesn't match");
+
+    result = db.users.find({ "_id": username })
+
+    if result.count() > 0:
+    	return template('result', message="Username is already registered on our database");
+    
+    secretKey = gen_secret(); # Generate a 16 bits random private key (for google autenticator)
+    encryptedPassword = encryptPass(password);
+
+    User = {
+    	"_id" 		: username,
+    	"name"		: name,
+    	"country" 	: country,
+    	"email"		: email,
+    	"secretKey" : secretKey,
+    	"password" 	: encryptedPassword
+    }
+
+    insertedUser = db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
+    print insertedUser
+
+    # Generate QR image to return the user
+    gauth_url 	= gen_gauth_url(APP_NAME, User['_id'], User['secretKey']);
+    qrcode 		= gen_qrcode_url(gauth_url)
+
+    print qrcode
+
+    return template('welcome_secondFactor', user=User, qrcode=qrcode);
         
 @post('/login_totp')        
 def login_totp():
     pass
 
-    
 if __name__ == "__main__":
     run(host='localhost',port=8080,debug=True)
 
@@ -236,7 +268,3 @@ if __name__ == "__main__":
 ################# Funciones auxiliares a partir de este punto #################
 ###############################################################################
 
-def random_char(n):
-	chars = string.ascii_uppercase + "1234567890"
-	return ''.join(random.choice(chars) for x in range(n))
-	
