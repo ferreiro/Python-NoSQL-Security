@@ -4,7 +4,7 @@
 	% if signup:
 	<form action="/signup_totp" method="POST">
 	% else:
-	<form action="/login" method="POST">
+	<form action="/login_totp" method="POST">
 	%end
 
 		<p> 
@@ -17,9 +17,14 @@
 			<input  class="inputField" id="password" name="password" required="required" type="password" placeholder="eg. X8df!90EO"/>
 		</p>
 
-		% if signup:
+		% if not signup:
 
+			<p> 
+				<label for="totpCode" class="youpasswd" data-icon="p">Your totp code</label> 
+				<input  class="inputField" id="totpCode" name="totpCode" required="required" placeholder="eg. X8df!90EO"/>
+			</p>
 
+		% else:
 			<p> 
 				<label for="password" class="youpasswd" data-icon="p">Retype the password </label> 
 				<input  class="inputField" id="password2" name="password2" required="required" type="password" placeholder="eg. X8df!90EO"/>
@@ -34,7 +39,6 @@
 				<label for="name" class="uname" data-icon="u">Your name</label>
 				<input  class="inputField" id="name" name="name" required="required" type="text" placeholder="Your name" />
 			</p>
-
 		% end
 
 		<p class="signin button"> 
