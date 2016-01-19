@@ -6,7 +6,7 @@ Grupo YYY
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no 
 haber colaborado de ninguna manera con otros grupos, haber compartido el ćodigo 
 con otros ni haberlo obtenido de una fuente externa.
-"""
+""" 
 
 from bottle import run, post
 # Resto de importaciones
@@ -15,6 +15,8 @@ from bottle import request, route, run, template, response, static_file
 from pymongo import MongoClient 
 from bson.son import SON
 from bson.code import Code
+import random
+import string
 
 client 	= MongoClient()
 db 		= client['giw']
@@ -58,7 +60,6 @@ def images(filename):
 def fonts(filename):
     return static_file(filename, root='static/')
 
-
 ##############
 # APARTADO A #
 ##############
@@ -96,11 +97,32 @@ def signup():
 @post('/change_password')
 def change_password():
     pass
+
+@post('/change_password')
+def change_password(nickname, old_password, new_password):
+	message = ""
+	found_user = db.users.find_one({"nickname":nickname})
+	if (!found_user):
+		message = "Usuario o contraseña incorrectos"
+	else if (found_user['password'] == old_password):
+		message = "Usuario o contraseña incorrectos"
+	else:
+		result = db.users.update_one({"nickname":nickname}, {"$set":{"password":new_password}})
+		message = "La contraseña del usuario %s ha sido modificada!" % (nickname)
+	return template("password_change", message = message);
             
 
 @post('/login')
-def login():
-    pass
+def login(nickname, password):
+	message = ""
+	found_user = db.users.find_one({"nickname":nickname})
+	if (!found_user):
+		message = "Usuario o contraseña incorrectos"
+	else if(found_user['password']== password):
+		message = "Usuario o contraseña incorrectos"
+	else:
+		message = "Bienvenido %s" %(nickname)
+	return template ("login", message = message) 
 
 
 ##############
@@ -114,8 +136,9 @@ def gen_secret():
     #
     # Ejemplo:
     # >>> gen_secret()
-    # '7ZVVBSKR22ATNU26'
-    pass
+    # '7ZVVBSKR22ATNU26' 
+	secret = random_char(16)
+    return secret; 
     
     
 def gen_gauth_url(app_name, username, secret):
@@ -156,3 +179,12 @@ def login_totp():
     
 if __name__ == "__main__":
     run(host='localhost',port=8080,debug=True)
+
+
+###############################################################################
+################# Funciones auxiliares a partir de este punto #################
+###############################################################################
+
+def random_char(n):
+	chars = string.ascii_uppercase + "1234567890"
+	return ''.join(random.choice(chars) for x in range(n))
