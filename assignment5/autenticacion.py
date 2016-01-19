@@ -66,16 +66,16 @@ def fonts(filename):
 # APARTADO A #
 ##############
 
-@get('/signup')
-def signup_view():
-	return template('signup');
-
 # Returns the hash
 def encryptPass(password):
 	return sha256_crypt.encrypt(password)
 
 def validPassword(password, hash):
 	return sha256_crypt.verify(password, hash);
+
+@get('/signup')
+def signup_view():
+	return template('signup_login', signup=True);
 
 @post('/signup')
 def signup():
@@ -133,11 +133,18 @@ def change_password():
 		{ "_id" : username }, 
 		{ "$set": { "password" : newPasswordEncrypted }
 	});
+
 	return template('result', message='Congratulations!! Password modified!!');
+
+@get('/login')
+def login_view(): 
+	return template('signup_login', signup=False);
 
 @post('/login')
 def login(nickname, password):
-	hola = 2
+	
+
+
 	"""
 	message = ""
 	found_user = db.users.find_one({"nickname":nickname})
