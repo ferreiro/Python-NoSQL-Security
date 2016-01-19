@@ -33,6 +33,11 @@
 				<input  class="inputField" id="name" name="name" required="required" type="text" placeholder="Your name" />
 			</p>
 
+			<p>
+				<label for="country" class="ucountry" data-icon="u">Your country</label>
+				<input  class="inputField" id="country" name="country" required="required" type="text" placeholder="Your country" />
+			</p>
+
 		% end
 
 		<p class="signin button"> 

@@ -105,6 +105,7 @@ def signup():
 		"name"      : name,
 		"country"   : country,
 		"email"     : email,
+		"secretKey" : None, # used in the second part of the assigmnet
 		"password"  : encryptedPassword
 	}  
 
@@ -195,7 +196,6 @@ def gen_gauth_url(app_name, username, secret):
 	#
 	# Más información en: 
 	#   https://github.com/google/google-authenticator/wiki/Key-Uri-Format
-	
 	gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
 	return gauth_url;
 
@@ -209,7 +209,6 @@ def gen_qrcode_url(gauth_url):
 	base = "http://api.qrserver.com/v1/create-qr-code/?data="
 	return base + str(gauth_url)
 	
-
 @get('/signup_totp')
 def login_view(): 
 	return template('signup_login_totp', signup=True);
@@ -275,15 +274,10 @@ def login_totp():
 	
 	if not validPassword(password, user['password']): # Old password doesnt match
 		return template('result', message='Usuario o contraseña incorrectos');
- 
-	print username
-	print password
-	print totpCode
-
+  
 	token = totpCode
 	secret = user['secretKey']
 	valid = otp.valid_totp(token, secret)
-	print valid
 
 	if not valid:
 		return template('result', message='Usuario o contraseña incorrectos')
