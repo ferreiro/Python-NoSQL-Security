@@ -126,7 +126,7 @@ def change_password():
 		return template('result', message='Usuario o contraseña incorrectos');
  
 	if not validPassword(oldPassword, user['password']): # Old password doesnt match
-		return template('result', message='passUsuario o contraseña incorrectos');
+		return template('result', message='Usuario o contraseña incorrectos');
 
 	newPasswordEncrypted = encryptPass(newPassword);
 	db.users.update_one(
