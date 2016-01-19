@@ -8,7 +8,7 @@ haber colaborado de ninguna manera con otros grupos, haber compartido el ćodigo
 con otros ni haberlo obtenido de una fuente externa.
 """ 
 
-from bottle import run, post
+from bottle import run, post, get
 # Resto de importaciones
 import pymongo
 from bottle import request, route, run, template, response, static_file
@@ -17,6 +17,8 @@ from bson.son import SON
 from bson.code import Code
 import random
 import string
+import hashlib
+from passlib.hash import sha256_crypt
 
 client 	= MongoClient()
 db 		= client['giw']
@@ -64,56 +66,82 @@ def fonts(filename):
 # APARTADO A #
 ##############
 
-@route('/signup', method='GET')
+@get('/signup')
 def signup_view():
 	return template('signup');
 
+# Returns the hash
+def encryptPass(password):
+	return sha256_crypt.encrypt(password)
+
+def verifyPass(hash):
+	return sha256_crypt.verify(hash)
+
 @post('/signup')
 def signup():
+
 	username = request.forms.get('username')
 	password = request.forms.get('password')
 	password2 = request.forms.get('password2')	
 
 	if password != password2:
-		return template('signup-fail', message="Password doesn't match");
+		return template('error', message="Password doesn't match");
 
 	result = db.users.find({ "_id": username })
 
 	if result.count() > 0:
-		return template('signup-fail', message="Username is already registered on our database");
+		return template('error', message="Username is already registered on our database");
 
-	# Valid user. Insert it on the database.
+	# Valid user to this point. Insert it on the database.
+
+	encryptedPassword = encriptedPassword(password);
+
 	User = {
 		"_id" : username,
 		"name": request.forms.get('name'),
 		"country" : request.forms.get('country'),
 		"email": request.forms.get('email'),
-		"password" : password
-	} 
+		"password" : encryptedPassword
+	}  
 
-	db.users.insert_one(User);
-	return template('welcome', user=User);
+	db.users.insert_one(user);
+	return template('welcome', user=user);
+ 
+@get('/change_password')
+def signup_view():
+	return template('change_password');
 
 @post('/change_password')
 def change_password():
-    pass
+ 	
+ 	validPassword = False
+	username 	 = request.forms.get('username')
+	old_password = request.forms.get('oldpassword')
+	new_password = request.forms.get('newpassword')
 
-@post('/change_password')
-def change_password(nickname, old_password, new_password):
-	message = ""
-	found_user = db.users.find_one({"nickname":nickname})
-	if (!found_user):
-		message = "Usuario o contraseña incorrectos"
+	#validPassword = 
+	"""
+	user = {
+		"_id" : username,
+		"password" : old_password
+	}
+
+	
+
+	if found_user.count() == 0:
+		return template('error', message='Usuario o contraseña incorrectos');
 	else if (found_user['password'] == old_password):
-		message = "Usuario o contraseña incorrectos"
+		return template('error', message='Usuario o contraseña incorrectos');
 	else:
-		result = db.users.update_one({"nickname":nickname}, {"$set":{"password":new_password}})
+		result = db.users.update_one({"_id":nickname}, {"$set":{"password":new_password}})
 		message = "La contraseña del usuario %s ha sido modificada!" % (nickname)
 	return template("password_change", message = message);
-            
+    """     
 
 @post('/login')
 def login(nickname, password):
+	hola = 2
+	"""
 	message = ""
 	found_user = db.users.find_one({"nickname":nickname})
 	if (!found_user):
@@ -123,7 +151,7 @@ def login(nickname, password):
 	else:
 		message = "Bienvenido %s" %(nickname)
 	return template ("login", message = message) 
-
+	"""
 
 ##############
 # APARTADO B #
@@ -138,7 +166,7 @@ def gen_secret():
     # >>> gen_secret()
     # '7ZVVBSKR22ATNU26' 
 	secret = random_char(16)
-    return secret; 
+	return secret; 
     
     
 def gen_gauth_url(app_name, username, secret):
