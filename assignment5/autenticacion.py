@@ -74,8 +74,8 @@ def signup_view():
 def encryptPass(password):
 	return sha256_crypt.encrypt(password)
 
-def verifyPass(hash):
-	return sha256_crypt.verify(hash)
+def validPassword(password, hash):
+	return sha256_crypt.verify(password, hash);
 
 @post('/signup')
 def signup():
@@ -85,16 +85,16 @@ def signup():
 	password2 = request.forms.get('password2')	
 
 	if password != password2:
-		return template('error', message="Password doesn't match");
+		return template('result', message="Password doesn't match");
 
 	result = db.users.find({ "_id": username })
 
 	if result.count() > 0:
-		return template('error', message="Username is already registered on our database");
+		return template('result', message="Username is already registered on our database");
 
 	# Valid user to this point. Insert it on the database.
 
-	encryptedPassword = encriptedPassword(password);
+	encryptedPassword = encryptPass(password);
 
 	User = {
 		"_id" : username,
@@ -104,8 +104,8 @@ def signup():
 		"password" : encryptedPassword
 	}  
 
-	db.users.insert_one(user);
-	return template('welcome', user=user);
+	db.users.insert_one(User);
+	return template('welcome', user=User);
  
 @get('/change_password')
 def signup_view():
@@ -114,29 +114,26 @@ def signup_view():
 @post('/change_password')
 def change_password():
  	
- 	validPassword = False
-	username 	 = request.forms.get('username')
-	old_password = request.forms.get('oldpassword')
-	new_password = request.forms.get('newpassword')
+	username 	= request.forms.get('username')
+	oldPassword = request.forms.get('oldpassword')
+	newPassword = request.forms.get('newpassword')
 
-	#validPassword = 
-	"""
-	user = {
-		"_id" : username,
-		"password" : old_password
-	}
+	user = db.users.find_one({ 
+		"_id" : username 
+	});
 
-	
+	if not user: # Username doesn't exists
+		return template('result', message='Usuario o contraseña incorrectos');
+ 
+	if not validPassword(oldPassword, user['password']): # Old password doesnt match
+		return template('result', message='passUsuario o contraseña incorrectos');
 
-	if found_user.count() == 0:
-		return template('error', message='Usuario o contraseña incorrectos');
-	else if (found_user['password'] == old_password):
-		return template('error', message='Usuario o contraseña incorrectos');
-	else:
-		result = db.users.update_one({"_id":nickname}, {"$set":{"password":new_password}})
-		message = "La contraseña del usuario %s ha sido modificada!" % (nickname)
-	return template("password_change", message = message);
-    """     
+	newPasswordEncrypted = encryptPass(newPassword);
+	db.users.update_one(
+		{ "_id" : username }, 
+		{ "$set": { "password" : newPasswordEncrypted }
+	});
+	return template('result', message='Congratulations!! Password modified!!');
 
 @post('/login')
 def login(nickname, password):
@@ -165,9 +162,8 @@ def gen_secret():
     # Ejemplo:
     # >>> gen_secret()
     # '7ZVVBSKR22ATNU26'
-	
-	secret = random_char(16)
-    return secret;
+	 
+    return random_char(16);
     
     
 def gen_gauth_url(app_name, username, secret):
@@ -183,7 +179,7 @@ def gen_gauth_url(app_name, username, secret):
     # Más información en: 
     #   https://github.com/google/google-authenticator/wiki/Key-Uri-Format
 	
-    gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
+	gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
 	return gauth_url;
         
 
@@ -196,8 +192,6 @@ def gen_qrcode_url(gauth_url):
     # 'http://api.qrserver.com/v1/create-qr-code/?data=otpauth%3A%2F%2Ftotp%2Fpepe_lopez%3Fsecret%3DJBSWY3DPEHPK3PXP%26issuer%3DGIW_grupoX'
     pass
     
-
-
 @post('/signup_totp')
 def signup_totp():
     pass
