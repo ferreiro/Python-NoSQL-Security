@@ -1,16 +1,29 @@
+    % include('header.tpl')
 
-<h1>Welcome {{ user['name'] }}!!!</h1>
-<p>Do you want to protect your account? Register your second factor authenticator!!!</p>
+    <div class="connection-box-wrap">
+        <div class="connection-box">
 
-<img src="{{qrcode}}" />
+            <h1>Welcome {{ user['name'] }}!!!</h1>
 
-{{qrcode}}
+            <p>
+                Do you want to protect your account?<br />
+                Register your <strong>second factor authentication</strong>!!!
+            </p>
 
-<p>
-	More options on your account
-</p>
-<ul>
-	<li>
-		<a href="/change_password">Change password</a>
-	</li>
-</ul>
+            <img src="{{qrcode}}" /><br />
+                
+            <a href="/login_totp" class="form-input-submit">Login</a>
+ 
+            <p>
+            	More options on your account
+            </p>
+
+            <ul>
+            	<li>
+            		<a href="/change_password">Change password</a>
+            	</li>
+            </ul>
+        </div>
+    </div>
+
+    % include('footer.tpl')

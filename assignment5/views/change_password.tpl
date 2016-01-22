@@ -1,19 +1,37 @@
+% include('header.tpl')
 
-	<form action="/change_password" method="POST">
-		<p> 
-			<label for="username" class="username" data-icon="u">Your username</label>
-			<input  class="inputField" id="username" name="username" required="required" type="text" placeholder="Username" />
-		</p> 
-		<p> 
-			<label for="oldpassword" class="youpasswd" data-icon="p">Old password </label> 
-			<input  class="inputField" id="oldpassword" name="oldpassword" required="required" type="password" placeholder="Your password"/>
-		</p>
-		<p> 
-			<label for="newpassword" class="youpasswd" data-icon="p">New password </label> 
-			<input  class="inputField" id="newpassword" name="newpassword" required="required" type="password" placeholder="Your new password"/>
-		</p>
-		<p class="signin button"> 
-			<input  class="submitField" type="submit" value="Sign up"/>
-		</p>
-	</form>
+<div class="connection-box-wrap">
+    <div class="connection-box">
+
+        <form action="/change_password" method="POST">
+			
+			<h1>Change password</h1>
+
+        	<div class="form-input"> 
+        		<label for="username">Your username</label>
+        		<input id="username" name="username" autocomplete="off" required="required" type="text" placeholder="Username" />
+        	</div>
+        	
+        	<div class="form-input"> 
+        		<label for="oldpassword">Old password</label>
+        		<input id="oldpassword" name="oldpassword" autocomplete="off" required="required" type="password" placeholder="Your old password" />
+        	</div>
+        	
+        	<div class="form-input"> 
+        		<label for="newpassword">New password</label>
+        		<input id="newpassword" name="newpassword" autocomplete="off" required="required" type="password" placeholder="Your new password" />
+        	</div>
+
+			 <div class="form-input">
+			 	<input type="submit" class="form-input-submit form-input-change" value="Change!"/>
+			 </div>
+
+        </form>
+
+    </div>
+</div>
+
+% include('footer.tpl')
+
+
  

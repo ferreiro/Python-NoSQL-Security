@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Autores: Jorge Ferreiro, Tomasso Innocenti and Luis
+Autores: Jorge Ferreiro, Tommaso Innocenti and Luis
 Grupo 12
 
 Este código es fruto ÚNICAMENTE del trabajo de sus miembros. Declaramos no 
@@ -10,7 +10,6 @@ con otros ni haberlo obtenido de una fuente externa.
 """ 
 
 from bottle import run, post, get
-# Resto de importaciones
 import hashlib
 import pymongo
 import onetimepass as otp
@@ -111,6 +110,8 @@ def signup():
 		"password"  : encryptedPassword
 	}  
 
+	print User
+
 	db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
 	return template('welcome', user=User);
  
@@ -140,7 +141,6 @@ def change_password():
 		{ "_id" : username }, 
 		{ "$set": { "password" : newPasswordEncrypted }
 	});
-
 	return template('result', message='Congratulations!! Password modified!!');
 
 @get('/login')
@@ -162,7 +162,7 @@ def login():
  
 	if not validPassword(password, user['password']): # Old password doesnt match
 		return template('result', message='Usuario o contraseña incorrectos');
-
+	print User
 	return template('welcome', user=user);
 
 ##############
@@ -245,7 +245,7 @@ def signup_totp():
 		"secretKey" : secretKey,
 		"password"  : encryptedPassword
 	}
-
+	print User
 	insertedUser = db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
 
 	# Generate QR image to return the user
@@ -265,24 +265,30 @@ def login_totp():
 	password = request.forms.get('password')
 	totpCode = request.forms.get('totpCode')
 
-	user = db.users.find_one({ 
+	User = db.users.find_one({ 
 		"_id" : username 
 	});
  
-	if not user: # Username doesn't exists
+	if not User: # Username doesn't exists
 		return template('result', message='Usuario o contraseña incorrectos');
 	
-	if not validPassword(password, user['password']): # Old password doesnt match
+	if not validPassword(password, User['password']): # Old password doesnt match
 		return template('result', message='Usuario o contraseña incorrectos');
   
 	token = totpCode
-	secret = user['secretKey']
+	secret = User['secretKey']
 	valid = otp.valid_totp(token, secret)
 
 	if not valid:
 		return template('result', message='Usuario o contraseña incorrectos')
+	
+	# For security protection, remove secret Key and password 
+	# from the User Dictionary before return them to the view.
+	del User['secretKey'] 
+	del User['password']
 
-	return template('welcome', user=user);
+	print User
+	return template('welcome', user=User);
 	
 if __name__ == "__main__":
 	run(host='localhost',port=8080,debug=True)

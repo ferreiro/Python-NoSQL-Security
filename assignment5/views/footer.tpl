@@ -1,13 +1,8 @@
 	
 	<div class="footer">
-		<p>
-			Project made with ♡ on Madrid<br />
-			<a href="mailto:me@jgferreiro.com;">Contact</a>
-	  	</p>  
+		<p>Designed by <a href="http://www.jgferreiro.com" target="_blank">Jorge ferreiro</a></p> 
+		<p>Source code on <a href="https://github.com/ferreiro/Python_NoSQL" target="_blank" class="less">Github</a></p> 
 	</div>
-
-</div><!-- FIN del FullPageWrapper -->
-
 
 	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
