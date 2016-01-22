@@ -73,6 +73,12 @@ def encryptPass(password):
 def validPassword(password, hash):
 	return sha256_crypt.verify(password, hash);
 
+# Redirecting to login when acessing home
+@get('/')
+def home():
+	response.status = 303
+	response.set_header('Location', '/login')
+
 ##############
 # APARTADO A #
 ##############
@@ -84,12 +90,12 @@ def signup_view():
 @post('/signup')
 def signup():
 
-	username    = request.forms.get('username')
-	name        = request.forms.get('name')
-	country     = request.forms.get('country')
-	email       = request.forms.get('email');
-	password    = request.forms.get('password')
-	password2   = request.forms.get('password2')    
+	username    = str(request.forms.get('username')).lower() # Store in lowercase
+	name        = str(request.forms.get('name')).lower()
+	country     = str(request.forms.get('country')).lower()
+	email       = str(request.forms.get('email')).lower()
+	password    = str(request.forms.get('password')).lower()
+	password2   = str(request.forms.get('password2')).lower()  
 
 	if password != password2:
 		return template('result', message="Password doesn't match");
@@ -108,9 +114,7 @@ def signup():
 		"email"     : email,
 		"secretKey" : None, # used in the second part of the assigmnet
 		"password"  : encryptedPassword
-	}  
-
-	print User
+	}
 
 	db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
 	return template('welcome', user=User);
@@ -122,9 +126,9 @@ def signup_view():
 @post('/change_password')
 def change_password():
 	
-	username    = request.forms.get('username')
-	oldPassword = request.forms.get('oldpassword')
-	newPassword = request.forms.get('newpassword')
+	username    = str(request.forms.get('username')).lower() # Store string in lowercase
+	oldPassword = str(request.forms.get('oldpassword')).lower()
+	newPassword = str(request.forms.get('newpassword')).lower()
 
 	user = db.users.find_one({ 
 		"_id" : username 
@@ -150,30 +154,29 @@ def login_view():
 @post('/login')
 def login():
 	
-	username = request.forms.get('username')
-	password = request.forms.get('password')
+	username = str(request.forms.get('username')).lower() # Store string in lowercase
+	password = str(request.forms.get('password')).lower()
 
-	user = db.users.find_one({ 
+	User = db.users.find_one({ 
 		"_id" : username 
 	});
 
-	if not user: # Username doesn't exists
+	if not User: # Username doesn't exists
 		return template('result', message='Usuario o contraseña incorrectos');
  
-	if not validPassword(password, user['password']): # Old password doesnt match
+	if not validPassword(password, User['password']): # Old password doesnt match
 		return template('result', message='Usuario o contraseña incorrectos');
-	print User
-	return template('welcome', user=user);
+
+	# For security reasons, remove secret Key and password 
+	# from the User Dictionary before return them to the view.
+	del User['secretKey'] 
+	del User['password']
+
+	return template('welcome', user=User);
 
 ##############
 # APARTADO B #
 ##############
-
-@get('/')
-def home():
-	secret = gen_secret();
-	url= gen_gauth_url("app_name", "jgferreiro", "123")
-	print gen_qrcode_url(url) 
 
 def gen_secret():
 	# Genera una cadena aleatoria de 16 caracteres a escoger entre las 26 
@@ -198,6 +201,9 @@ def gen_gauth_url(app_name, username, secret):
 	#
 	# Más información en: 
 	#   https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+	app_name = str(app_name).lower()
+	username = str(username).lower()
+	secret   = str(secret).lower()
 	gauth_url = "otpauth://totp/%s?secret=%s&issuer=%s" % (username, secret, app_name)
 	return gauth_url;
 
@@ -219,12 +225,12 @@ def login_view():
 def signup_totp():
 	global APP_NAME # using when exporting the QR!!!
 
-	username    = request.forms.get('username')
-	name        = request.forms.get('name')
-	country     = request.forms.get('country')
-	email       = request.forms.get('email');
-	password    = request.forms.get('password')
-	password2   = request.forms.get('password2')    
+	username    = str(request.forms.get('username')).lower() # Store in lowercase
+	name        = str(request.forms.get('name')).lower()
+	country     = str(request.forms.get('country')).lower()
+	email       = str(request.forms.get('email')).lower()
+	password    = str(request.forms.get('password')).lower()
+	password2   = str(request.forms.get('password2')).lower()  
 
 	if password != password2:
 		return template('result', message="Password doesn't match");
@@ -238,14 +244,14 @@ def signup_totp():
 	encryptedPassword = encryptPass(password);
 
 	User = {
-		"_id"       : username,
+		"_id"       : username.lower(),
 		"name"      : name,
 		"country"   : country,
 		"email"     : email,
 		"secretKey" : secretKey,
 		"password"  : encryptedPassword
 	}
-	print User
+
 	insertedUser = db.users.insert_one(User); # Valid user to this point. Insert it on the database.+
 
 	# Generate QR image to return the user
@@ -261,10 +267,10 @@ def login_view():
 @post('/login_totp')        
 def login_totp():
 	
-	username = request.forms.get('username')
-	password = request.forms.get('password')
-	totpCode = request.forms.get('totpCode')
-
+	username = str(request.forms.get('username')).lower()
+	password = str(request.forms.get('password')).lower()
+	totpCode = str(request.forms.get('totpCode')).lower()
+ 
 	User = db.users.find_one({ 
 		"_id" : username 
 	});
@@ -282,12 +288,11 @@ def login_totp():
 	if not valid:
 		return template('result', message='Usuario o contraseña incorrectos')
 	
-	# For security protection, remove secret Key and password 
+	# For security reasons, remove secret Key and password 
 	# from the User Dictionary before return them to the view.
 	del User['secretKey'] 
 	del User['password']
 
-	print User
 	return template('welcome', user=User);
 	
 if __name__ == "__main__":
