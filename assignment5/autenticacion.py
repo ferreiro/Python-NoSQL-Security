@@ -15,7 +15,7 @@ import pymongo
 import onetimepass as otp
 import random
 import string
-from passlib.hash import sha256_crypt
+from passlib.hash import pbkdf2_sha256
 from bottle import request, route, run, template, response, static_file
 from pymongo import MongoClient
 
@@ -68,10 +68,15 @@ def fonts(filename):
 #################################
 
 def encryptPass(password):
-	return sha256_crypt.encrypt(password)
+	rounds = random.randint(35000,60000) # random rounds
+	salt_size = random.randint(800,900) # random salt size
+	return pbkdf2_sha256.encrypt(password, rounds=rounds, salt_size=salt_size)
 
 def validPassword(password, hash):
-	return sha256_crypt.verify(password, hash);
+	try:
+		return pbkdf2_sha256.verify(password, hash);
+	except: # The password is not well formated (eg, using pbkd2_sha256 algorithm)
+ 		return False
 
 # Redirecting to login when acessing home
 @get('/')
