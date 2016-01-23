@@ -1,6 +1,6 @@
 	
 	<div class="footer">
-		<p>Designed by <a href="http://www.jgferreiro.com" target="_blank">Jorge ferreiro</a></p> 
+		<p>Designed by <a href="http://www.jgferreiro.com" target="_blank">Jorge García ferreiro</a></p> 
 		<p>Source code on <a href="https://github.com/ferreiro/Python_NoSQL" target="_blank" class="less">Github</a></p> 
 	</div>
 
