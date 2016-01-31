@@ -1,13 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from bottle import run, get, template,request
+from bottle import run, post, get
+from bottle import run, get, template,request, route, static_file, response
 from time import gmtime, strftime
 import time
 import string
 import random
 import json
 import urllib2
-import urllib 
+import urllib
+
+
+#####################################
+########## ASSETS ROUTING ###########
+#####################################
+
+@route('/views/<filepath:path>')
+def file_stac(filepath):
+    return static_file(filepath, root="./views")
+
+@route('/<filename:re:.*\.js>')
+def javascripts(filename):
+    return static_file(filename, root='static/')
+
+@route('/<filename:re:.*\.css>')
+def stylesheets(filename):
+    return static_file(filename, root='static/')
+
+@route('/<filename:re:.*\.(jpg|png|gif|ico)>')
+def images(filename):
+    return static_file(filename, root='static/')
+
+@route('/<filename:re:.*\.(eot|ttf|woff|svg)>')
+def fonts(filename):
+    return static_file(filename, root='static/')
 
 # Credenciales. 
 # https://developers.google.com/identity/protocols/OpenIDConnect#appsetup
@@ -21,15 +47,6 @@ config = {
     'state' : 'XXX',
     'discovery_doc': 'https://accounts.google.com/.well-known/openid-configuration'
 }
-
-# Fichero de descubrimiento para obtener el 'authorization endpoint' y el 
-# 'token endpoint'
-# https://developers.google.com/identity/protocols/OpenIDConnect#authenticatingtheuser
-DISCOVERY_DOC = "https://accounts.google.com/.well-known/openid-configuration"
-
-# Token validation endpoint para decodificar JWT
-# https://developers.google.com/identity/protocols/OpenIDConnect#validatinganidtoken
-TOKEN_VALIDATION_ENDPOINT = "https://www.googleapis.com/oauth2/v3/tokeninfo"
 
 def gen_secret():
     # Genera una cadena aleatoria de 16 caracteres a escoger entre las 26 
@@ -124,14 +141,12 @@ def token():
         tokenData       = getTokenData(id_token); # Dictionary with the token information (including email and so)
 
         if (validateToken(tokenData)):
-            print "IT'S VALID"
             profile = {
                 'email' : tokenData['email']
             }
-            print tokenData
             return template('welcome', profile=profile);
         else:
-            print "BOOOOO. You're a hacker!!"
+            return "BOOOOO. You're a hacker!!. Tokens not valid"
 
 if __name__ == "__main__":
     run(host='localhost',port=8080,debug=True)

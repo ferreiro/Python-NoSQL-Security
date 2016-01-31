@@ -141,7 +141,6 @@ ul, li {
     background: #fff;
     background: rgba(0,0,0,0.7);
     position: fixed;
-    display: none;
     bottom: 0;
     text-align: center;
     padding: 20px 0;
