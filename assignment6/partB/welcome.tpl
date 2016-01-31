@@ -1,3 +1,3 @@
 <h1>
-    Welcome {{profile['email']}}!
+    Welcome {{profile['email']}}! 
 </h1>

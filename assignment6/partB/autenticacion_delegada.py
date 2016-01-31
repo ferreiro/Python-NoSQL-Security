@@ -128,6 +128,7 @@ def token():
             profile = {
                 'email' : tokenData['email']
             }
+            print tokenData
             return template('welcome', profile=profile);
         else:
             print "BOOOOO. You're a hacker!!"
