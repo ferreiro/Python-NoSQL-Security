@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bottle import run, get, template,request
+from time import gmtime, strftime
+import time
 import string
 import random
 import json
@@ -60,8 +62,14 @@ def getTokenEndPoint():
     data = json.load(urllib2.urlopen(config['discovery_doc']))
     return data['token_endpoint']
 
+def getTokenJWKS_uri():
+    global config
+    data = json.load(urllib2.urlopen(config['discovery_doc']))
+    return data['jwks_uri']
+
 def getEncryptedToken(token_endpoint, userCode):
     global config 
+   
     values = {
         'code' : userCode,
         'client_id' : config['client_id'],
@@ -73,7 +81,30 @@ def getEncryptedToken(token_endpoint, userCode):
     data = urllib.urlencode(values)
     req = urllib2.Request(token_endpoint, data)
     response = urllib2.urlopen(req)
-    return response.read()
+    tokenDictionary = json.load(response) 
+    return tokenDictionary
+
+def getTokenData(id_token):
+    url = 'https://www.googleapis.com/oauth2/v3/tokeninfo?'
+    url += 'id_token=' + id_token
+    data = json.load(urllib2.urlopen(url))
+    return data
+
+def validateToken(tokenData):
+    global config
+
+    if tokenData['iss'] != 'https://accounts.google.com' and tokenData['iss'] != 'accounts.google.com':
+        return False # tokenData is not from google
+    if tokenData['aud'] != config['client_id']:
+        return False # Token is not from our webpage
+
+    tokenTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(float(tokenData['exp']))); # epoch to date
+    currentTime = strftime("%Y-%m-%d %H:%M:%S", gmtime());
+
+    if tokenTime < currentTime:
+        return False
+
+    return True
 
 @get('/token')
 def token():
@@ -87,10 +118,19 @@ def token():
 
     if state == config['state']:
 
-        token_endpoint = getTokenEndPoint(); 
-        token = getEncryptedToken(token_endpoint, userCode)
+        token_endpoint  = getTokenEndPoint(); 
+        tokenDictionary = getEncryptedToken(token_endpoint, userCode)
+        id_token        = tokenDictionary['id_token']
+        tokenData       = getTokenData(id_token); # Dictionary with the token information (including email and so)
 
-        print token
+        if (validateToken(tokenData)):
+            print "IT'S VALID"
+            profile = {
+                'email' : tokenData['email']
+            }
+            return template('welcome', profile=profile);
+        else:
+            print "BOOOOO. You're a hacker!!"
 
 if __name__ == "__main__":
     run(host='localhost',port=8080,debug=True)
